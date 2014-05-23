@@ -23,15 +23,15 @@ bugout.log('some object or string');
 In the debugout() function definition, you can edit some things:
 
 ```js
-self.realTimeLoggingOn = true; // log in real time (forwards to console.log)
+self.realTimeLoggingOn = true; // log in real time (toggles console.log)
 self.useTimestamps = true; // insert a timestamp in front of each log
 self.useLocalStorage = false; // store the output using window.localStorage()
-self.continuous = true; // if using localStorage, will continue to add to same the log each session, with dividers
+self.continuous = true; // if using localStorage, will continue to add to the same log file each session, with dividers
 ```
 
 ### Methods
 
-- `log()` - like `console.log()` only as though "it pressed record".
+- `log()` - like `console.log()` only as though you "pressed record".
 - `getLog()` - get yer log.
 - `clear()` - clear the current log.
 - `determineType()` - a more granular version of `typeof` for your convenience
