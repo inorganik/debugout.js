@@ -29,6 +29,13 @@ self.useLocalStorage = false; // store the output using window.localStorage()
 self.continuous = true; // if using localStorage, will continue to add to same the log each session, with dividers
 ```
 
+### Methods
+
+- `log()` - like `console.log()` only as though "it pressed record".
+- `getLog()` - get yer log.
+- `clear()` - clear the current log.
+- `determineType()` - a more granular version of `typeof` for your convenience
+
 ### Advantages
 
 - Have an idea what's going on when a client/tester reports a bug
