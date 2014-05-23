@@ -5,6 +5,8 @@ debugout.js
 
 For instance, you could put a button in your app that sends you the log in some way, like posting it to an endpoint on your server.
 
+##[Try the demo](http://inorganik.github.io/debugout.js/)
+
 ### Usage
 
 Create a new debugout object and replace all your console log methods with the debugout's log method:
@@ -29,6 +31,6 @@ self.continuous = true; // if using localStorage, will continue to add to same t
 
 ### Advantages
 
-- Toggle console logging on and off in one place
 - Have an idea what's going on when a client/tester reports a bug
-- Know how far apart logs occur, and how long a client/tester was using your app
+- Toggle console logging on and off in one place
+- Know when things happened, and how long a client/tester was using your app

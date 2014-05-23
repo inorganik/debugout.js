@@ -40,7 +40,9 @@
             <h3 class="marginTop marginBottom"><a class="lime weight700" href="https://github.com/inorganik/debugout.js">Download on Github</a></h3>
         </section>
         <section>
-            <p class="large weight300">Create a new debugout object and replace all your console log methods with the debugout's log method: </p>
+            <div class="col-inner-no-lr">
+                <p class="large weight300">Create a new debugout object and replace all your console log methods with the debugout's log method: </p>
+            </div>
         </section>
         <section class="marginBottom">
             <div class="col full marginBottom marginTop">
@@ -61,13 +63,15 @@
             </div>
         </section>
         <section>
-            <p class="large weight300">Your application can access the log any time by using debugout's getLog() method, then you can do something with it.</p>
-            <input type="button" class="inlineLeft marginRight" value="Get log" onClick="displayLog()" style="width:80px;">
+            <div class="col-inner-no-lr">
+                <p class="large weight300">Your application can access the log any time by using debugout's getLog() method, then you can do something with it.</p>
+                <input type="button" class="inlineLeft marginRight" value="Get log" onClick="displayLog()" style="width:80px;">
+            </div>
         </section>
         <section class="marginBottom">
             <div class="col full marginBottom marginTop">
-                <div class="code-contain marginBottom indigo">
-                    <code id="codeVisualizer"></code>
+                <div class="code-contain marginBottom lime">
+                    <code id="codeVisualizer">// Click 'Get log' to display the log recorded by debugout</code>
                 </div>
             </div>
         </section>

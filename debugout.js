@@ -1,3 +1,11 @@
+/*
+
+    debugout.js
+    by @inorganik
+    v 0.1.0
+    
+*/
+
 // save all the console.logs
 function debugout() {
 	var self = this;
@@ -6,7 +14,7 @@ function debugout() {
 	self.realTimeLoggingOn = true; // log in real time (forwards to console.log)
 	self.useTimestamps = true; // insert a timestamp in front of each log
 	self.useLocalStorage = false; // store the output using window.localStorage()
-	self.continuous = true; // if using localStorage, will continue to add to same the log each session, with dividers
+	self.continuous = true; // if using localStorage, will continue to add to the same file each session, with dividers
 
 	// vars
 	self.depth = 0;
@@ -117,13 +125,6 @@ function debugout() {
 			str += '\t';
 		}
 		return str;
-	}
-	this.objectSize = function(object) {
-	    var size = 0, key;
-	    for (key in obj) {
-	        if (object.hasOwnProperty(key)) size++;
-	    }
-	    return size;
 	}
 	this.getLog = function() {
 		var endTime = new Date();
