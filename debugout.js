@@ -89,7 +89,7 @@ function debugout() {
 				}
 				self.depth--;
 				self.currentResult += self.indentsForDepth(self.depth);
-				self.currentResult += '}\n';
+				self.currentResult += '},\n';
 				if (self.depth == 0) return self.currentResult;
 				break;
 			case 'Array' :
