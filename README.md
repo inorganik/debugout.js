@@ -1,9 +1,9 @@
 debugout.js
 ===========
 
-(debug output) records and saves console logs, so that your application can access them.
+(debug output) records and saves console logs so that your application can access them, for the purpose of debugging an app while it's in beta. 
 
-For instance, you could put a button in your app that sends you the log in some way, like posting it to an endpoint on your server.
+Then you can add a button for the tester to output the log and send it to you, or have your app post it to an endpoint on your server.
 
 ##[Try the demo](http://inorganik.github.io/debugout.js/)
 
