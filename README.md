@@ -78,6 +78,8 @@ $('#downloadLog').on('click', function() {
 
 ##### Example #2: PhoneGap app with [Email Composer plugin](https://github.com/inorganik/cordova-emailComposerWithAttachments) that attaches the log to an email
 
+(Also requires File plugin: `cordova plugin add org.apache.cordova.file`)
+
 ```js
 $('#sendLog').on('click', function() {
 	var logFile = bugout.getLog();
