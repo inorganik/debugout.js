@@ -127,7 +127,7 @@ function debugout() {
 		return str;
 	}
 	this.getLog = function() {
-		var endTime = new Date();
+		var retrievalTime = new Date();
 		// if using local storage, get values
 		if (self.useLocalStorage) {
 			var saved = window.localStorage.getItem('debugout.js');
@@ -135,18 +135,28 @@ function debugout() {
 				saved = JSON.parse(saved);
 				self.startTime = new Date(saved.startTime);
 				self.output = saved.log;
-				endTime = new Date(saved.lastLog);
+				retrievalTime = new Date(saved.lastLog);
 			}
 		}
-		self.output += '\n---- End of log: '+endTime+' ----\n';
-		self.output += self.formatSessionDuration(self.startTime, endTime);
+		self.output += '\n---- Log retrieved: '+retrievalTime+' ----\n';
+		self.output += self.formatSessionDuration(self.startTime, retrievalTime);
+		if (self.realTimeLoggingOn) console.log('[debugout.js] getLog()'];
 		return self.output
 	}
 	this.clear = function() {
-		self.output = '';
+		var clearTime = new Date();
+		self.output = '---- Log cleared: '+clearTime+' ----\n';
 		if (self.useLocalStorage) {
-			window.localStorage.removeItem('debugout.js');
+			// local storage
+			var saveObject = {
+				startTime: self.startTime,
+				log: self.output,
+				lastLog: clearTime
+			}
+			saveObject = JSON.stringify(saveObject);
+			window.localStorage.setItem('debugout.js', saveObject);
 		}
+		if (self.realTimeLoggingOn) console.log('[debugout.js] clear()'];
 	}
 	// calculate testing time
 	this.formatSessionDuration = function(startTime, endTime) {
