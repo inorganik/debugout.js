@@ -41,7 +41,7 @@
         </section>
         <section>
             <div class="col-inner-no-lr">
-                <p class="large weight300">Create a new debugout object and replace all your console log methods with the debugout's log method: </p>
+                <p class="large weight300 noMargin">Create a new debugout object and replace all your console log methods with debugout's log() method: </p>
             </div>
         </section>
         <section class="marginBottom">
@@ -64,7 +64,7 @@
         </section>
         <section>
             <div class="col-inner-no-lr">
-                <p class="large weight300">Your application can access the log any time by using debugout's getLog() method, then you can do something with it.</p>
+                <p class="large weight300">Your application can access the log any time by using debugout's getLog() method, then you can do something with it, like letting the user download it.</p>
                 <input type="button" class="inlineLeft marginRight" value="Download log" onClick="downloadLog()" style="width:120px;">
             </div>
         </section>
@@ -123,7 +123,7 @@
 
     function displayLog() {
         bugout.log('will displayLog()');
-        // the core purpose for useing debugout:
+        // the core purpose for using debugout:
         var output = bugout.getLog();
         // print debugout's output in the browser window
         // but first, format for html

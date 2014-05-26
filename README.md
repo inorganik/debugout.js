@@ -9,7 +9,7 @@ Then you can add a button for the tester to output the log ([see examples](#outp
 
 ### Usage
 
-Create a new debugout object and replace all your console log methods with the debugout's log method:
+Create a new debugout object and replace all your console log methods with debugout's log method:
 
 ```js
 var bugout = new debugout();
@@ -51,15 +51,19 @@ Each example assumes that you have established a `debugout` object and are loggi
 
 ```js
 var bugout = new debugout.js
-bugout.log(this);
-bugout.log(that);
-bugout.log(etc);
+bugout.log('something');
+bugout.log(somethingElse);
+bugout.log('etc');
 ```
 
-##### Example #1: Button with jQuery to download the log as a .txt file
+##### Example #1: Button that downloads the log as a .txt file
+
+```html
+    &lt;input type="button" value="Download log" onClick="downloadLog()"&gt;
+````
 
 ```js
-$('#downloadLog').on('click', function() {
+function downloadLog() {
 	var file = "data:text/plain;charset=utf-8,";
 	var logFile = bugout.getLog();
 	var encoded = encodeURIComponent(logFile);
@@ -72,14 +76,16 @@ $('#downloadLog').on('click', function() {
 	document.body.appendChild(a);
 	a.click();
 	a.remove();
-});
+}
 
 ```
 
 ##### Example #2: PhoneGap app with [Email Composer plugin](https://github.com/inorganik/cordova-emailComposerWithAttachments) that attaches the log to an email
 
+Example shown also requires the File plugin: `cordova plugin add org.apache.cordova.file`.
+
 ```js
-$('#sendLog').on('click', function() {
+function sendLog() {
 	var logFile = bugout.getLog();
 
 	// save the file locally, so it can be retrieved from emailComposer
@@ -100,7 +106,7 @@ $('#sendLog').on('click', function() {
 			}, fileSystemError);
 		}, fileSystemError);
 	}, fileSystemError);
-});
+}
 
 function fileSystemError(error) {
     bugout.log('Error getting file system: '+error.code);
