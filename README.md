@@ -3,7 +3,7 @@ debugout.js
 
 (debug output) records and saves console logs so that your application can access them, for the purpose of debugging an app while it's in beta. 
 
-Then you can add a button for the tester to output the log ([see examples](#outputting)) and download it, or have your app post it to an endpoint on your server.
+Then you can add a button for the tester to download the log, or do something else ([see examples](#outputting)).
 
 ##[Try the demo](http://inorganik.github.io/debugout.js/)
 
@@ -22,12 +22,10 @@ bugout.log('some object or string');
 
 In the debugout() function definition, you can edit some things:
 
-```js
-self.realTimeLoggingOn = true; // log in real time (toggles console.log)
-self.useTimestamps = true; // insert a timestamp in front of each log
-self.useLocalStorage = false; // store the output using window.localStorage()
-self.continuous = true; // if using localStorage, will continue to add to the same log file each session, with dividers
-```
+- `self.realTimeLoggingOn = true;` - log in real time (toggles console.log)
+- `self.useTimestamps = true;` - insert a timestamp in front of each log
+- `self.useLocalStorage = false;` - store the output using window.localStorage()
+- `self.continuous = true;` - if using localStorage, will keep adding to the same log file each session, with dividers
 
 ### Methods
 
@@ -59,7 +57,7 @@ bugout.log('etc');
 ##### Example #1: Button that downloads the log as a .txt file
 
 ```html
-    &lt;input type="button" value="Download log" onClick="downloadLog()"&gt;
+<input type="button" value="Download log" onClick="downloadLog()">
 ````
 
 ```js
@@ -82,11 +80,7 @@ function downloadLog() {
 
 ##### Example #2: PhoneGap app with [Email Composer plugin](https://github.com/inorganik/cordova-emailComposerWithAttachments) that attaches the log to an email
 
-<<<<<<< HEAD
 Example shown also requires the File plugin: `cordova plugin add org.apache.cordova.file`.
-=======
-(Also requires File plugin: `cordova plugin add org.apache.cordova.file`)
->>>>>>> FETCH_HEAD
 
 ```js
 function sendLog() {
