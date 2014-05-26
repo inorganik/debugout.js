@@ -140,7 +140,7 @@ function debugout() {
 		}
 		self.output += '\n---- Log retrieved: '+retrievalTime+' ----\n';
 		self.output += self.formatSessionDuration(self.startTime, retrievalTime);
-		if (self.realTimeLoggingOn) console.log('[debugout.js] getLog()'];
+		if (self.realTimeLoggingOn) console.log('[debugout.js] getLog()');
 		return self.output
 	}
 	this.clear = function() {
@@ -156,7 +156,7 @@ function debugout() {
 			saveObject = JSON.stringify(saveObject);
 			window.localStorage.setItem('debugout.js', saveObject);
 		}
-		if (self.realTimeLoggingOn) console.log('[debugout.js] clear()'];
+		if (self.realTimeLoggingOn) console.log('[debugout.js] clear()');
 	}
 	// calculate testing time
 	this.formatSessionDuration = function(startTime, endTime) {
