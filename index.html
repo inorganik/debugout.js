@@ -65,14 +65,7 @@
         <section>
             <div class="col-inner-no-lr">
                 <p class="large weight300">Your application can access the log any time by using debugout's getLog() method, then you can do something with it.</p>
-                <input type="button" class="inlineLeft marginRight" value="Get log" onClick="displayLog()" style="width:80px;">
-            </div>
-        </section>
-        <section class="marginBottom">
-            <div class="col full marginBottom marginTop">
-                <div class="code-contain marginBottom lime">
-                    <code id="codeVisualizer">// Click 'Get log' to display the log recorded by debugout</code>
-                </div>
+                <input type="button" class="inlineLeft marginRight" value="Download log" onClick="downloadLog()" style="width:120px;">
             </div>
         </section>
     </div>
@@ -136,6 +129,21 @@
         // but first, format for html
         output = output.replace(/\n/g, '<br>').replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
         document.getElementById('codeVisualizer').innerHTML = output;
+    }
+
+    function downloadLog() {
+        var file = "data:text/plain;charset=utf-8,";
+        var logFile = bugout.getLog();
+        var encoded = encodeURIComponent(logFile);
+        file += encoded;
+
+        var a = document.createElement('a');
+        a.href = file;
+        a.target   = '_blank';
+        a.download = 'myApp_log.txt';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
     }
 
     </script>

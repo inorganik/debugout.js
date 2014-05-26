@@ -62,7 +62,7 @@ bugout.log(etc);
 $('#downloadLog').on('click', function() {
 	var file = "data:text/plain;charset=utf-8,";
 	var logFile = bugout.getLog();
-	var encoded = encodeURIComponent(logFile).replace(/\n/, '%0A');
+	var encoded = encodeURIComponent(logFile);
 	file += encoded;
 
 	var a = document.createElement('a');
