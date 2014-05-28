@@ -84,7 +84,6 @@ function debugout() {
 				self.currentResult += '{\n';
 				self.depth++;
 				self.parentSizes.push(self.objectSize(obj));
-				console.log(self.parentSizes);
 				var i = 0;
 				for (var prop in obj) {
 					self.currentResult += self.indentsForDepth(self.depth);
@@ -111,7 +110,6 @@ function debugout() {
 				self.currentResult += '[';
 				self.depth++;
 				self.parentSizes.push(obj.length);
-				console.log(self.parentSizes);
 				for (var i = 0; i < obj.length; i++) {
 					var subtype = self.determineType(obj[i]);
 					if (subtype == 'Object' || subtype == 'Array') self.currentResult += '\n' + self.indentsForDepth(self.depth);
