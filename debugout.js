@@ -2,7 +2,7 @@
 
     debugout.js
     by @inorganik
-    v 0.1.1
+    v 0.2.0
     
 */
 
@@ -18,9 +18,12 @@ function debugout() {
 
 	// vars
 	self.depth = 0;
+	self.parentSizes = [0];
 	self.currentResult = '';
 	self.startTime = new Date();
 	self.output = '';
+
+	this.version = function () { return '0.2.0' }
 
 	this.log = function(obj) {
 		// log in real time
@@ -45,8 +48,8 @@ function debugout() {
 			saveObject = JSON.stringify(saveObject);
 			window.localStorage.setItem('debugout.js', saveObject);
 		}
-		// for objects - reset
 		self.depth = 0;
+		self.parentSizes = [0];
 		self.currentResult = '';
 	}
 	// like typeof but classifies objects of type 'object'
@@ -80,27 +83,64 @@ function debugout() {
 			case 'Object' :
 				self.currentResult += '{\n';
 				self.depth++;
+				self.parentSizes.push(self.objectSize(obj));
+				console.log(self.parentSizes);
+				var i = 0;
 				for (var prop in obj) {
 					self.currentResult += self.indentsForDepth(self.depth);
 					self.currentResult += prop + ': ';
 					var subtype = self.determineType(obj[prop]);
 					var subresult = self.formatType(subtype, obj[prop]);
-					if (subresult) self.currentResult += subresult + ',\n';
+					if (subresult) {
+						self.currentResult += subresult;
+						if (i != self.parentSizes[self.depth]-1) self.currentResult += ',';
+						self.currentResult += '\n';
+					} else {
+						if (i != self.parentSizes[self.depth]-1) self.currentResult += ',';
+						self.currentResult += '\n';
+					}
+					i++;
 				}
 				self.depth--;
+				self.parentSizes.pop();
 				self.currentResult += self.indentsForDepth(self.depth);
-				self.currentResult += '},\n';
+				self.currentResult += '}';
 				if (self.depth == 0) return self.currentResult;
 				break;
 			case 'Array' :
-				var arr = [];
+				self.currentResult += '[';
 				self.depth++;
+				self.parentSizes.push(obj.length);
+				console.log(self.parentSizes);
 				for (var i = 0; i < obj.length; i++) {
 					var subtype = self.determineType(obj[i]);
-					arr.push(self.formatType(subtype, obj[i]));
+					if (subtype == 'Object' || subtype == 'Array') self.currentResult += '\n' + self.indentsForDepth(self.depth);
+					var subresult = self.formatType(subtype, obj[i]);
+					if (subresult) {
+						self.currentResult += subresult;
+						if (i != self.parentSizes[self.depth]-1) self.currentResult += ', ';
+						if (subtype == 'Array') self.currentResult += '\n';
+					} else {
+						if (i != self.parentSizes[self.depth]-1) self.currentResult += ', ';
+						if (subtype != 'Object') self.currentResult += '\n';
+						else if (i == self.parentSizes[self.depth]-1) self.currentResult += '\n';
+					}
 				}
 				self.depth--;
-				return '['+arr.join(', ')+']';
+				self.parentSizes.pop();
+				self.currentResult += ']';
+				if (self.depth == 0) return self.currentResult;
+				break;
+			case 'function' :
+				obj += '';
+				var lines = obj.split('\n');
+				for (var i = 0; i < lines.length; i++) {
+					if (lines[i].match(/\}/)) self.depth--;
+					self.currentResult += self.indentsForDepth(self.depth);
+					if (lines[i].match(/\{/)) self.depth++;
+					self.currentResult += lines[i] + '\n';
+				}
+				return self.currentResult;
 				break;
 			case 'RegExp' :
 				return '/'+obj.source+'/';
@@ -116,7 +156,6 @@ function debugout() {
 				if (obj) return 'true';
 				else return 'false';
 			case 'number' :
-			case 'function' :
 				return obj;
 				break;
 		}
@@ -183,7 +222,13 @@ function debugout() {
 		var secs = ('0' + timestamp.getSeconds()).slice(-2);
 		return '['+ year + '-' + month + '-' + date + ' ' + hrs + ':' + mins + ':'+secs + ']: ';
 	}
-	this.version = function () { return '0.1.1' }
+	this.objectSize = function(obj) {
+	    var size = 0, key;
+	    for (key in obj) {
+	        if (obj.hasOwnProperty(key)) size++;
+	    }
+	    return size;
+	}
 
 	// resume and/or start log
 	if (self.useLocalStorage && self.continuous) {

@@ -52,11 +52,13 @@
                         bugout.log('An array:');<br>
                         bugout.log(arr);<br>
                         bugout.log('A function:');<br>
-                        bugout.log(testFunc);<br>
+                        bugout.log(bugout.objectSize);<br>
                         bugout.log('A regex');<br>
                         bugout.log(rgx);<br>
-                        bugout.log('And here\'s an object with nested objects...');<br>
-                        bugout.log(obj);
+                        bugout.log('an object with nested objects...');<br>
+                        bugout.log(obj);<br>
+                        bugout.log('an array of objects...');<br>
+                        bugout.log(arrayWithObjects);<br>
                     </code>
                 </div>
             </div>
@@ -84,7 +86,7 @@
     // that means: not inside any functions
     var bugout = new debugout;
 
-    // a complex test object
+    // a test object
     var obj = {
         name: 'Jamie',
         age: 34,
@@ -114,6 +116,11 @@
     }
     // a regex
     var rgx = new RegExp(/debugout/);
+    // array with objects
+    var songOne = { genre: 'Drum \'n Bass', subgenre: 'liquid' }
+    var songTwo = { genre: 'Dubstep', subgenre: 'brostep', someArray: arr }
+    var songThree = { genre: 'R&B', subgenre: 'soul revival' }
+    var arrayWithObjects = [songOne, songTwo, songThree];
     
     window.onload = function() {
         document.getElementById('version').innerHTML = 'v'+bugout.version();
@@ -123,17 +130,18 @@
         bugout.log('An array:');
         bugout.log(arr);
         bugout.log('A function:');
-        bugout.log(testFunc);
-        bugout.log('A regex');
+        bugout.log(bugout.objectSize);
+        bugout.log('A regex:');
         bugout.log(rgx);
-        bugout.log('And here\'s an object with nested objects...');
+        bugout.log('an object with nested objects and arrays...');
         bugout.log(obj);
+        bugout.log('an array of objects...');
+        bugout.log(arrayWithObjects);
     }
 
     function displayLog() {
         var output = bugout.getLog();
-        // print debugout's output in the browser window
-        // but first, format for html
+        // format for html
         output = output.replace(/\n/g, '<br>').replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
         document.getElementById('codeVisualizer').innerHTML = output;
     }
@@ -147,7 +155,7 @@
         var a = document.createElement('a');
         a.href = file;
         a.target   = '_blank';
-        a.download = 'myApp_log.txt';
+        a.download = 'debugout_log.txt';
         document.body.appendChild(a);
         a.click();
         a.remove();
