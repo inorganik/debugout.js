@@ -2,7 +2,7 @@
 
     debugout.js
     by @inorganik
-    v 0.1.0
+    v 0.1.1
     
 */
 
@@ -12,7 +12,7 @@ function debugout() {
 
 	// OPTIONS
 	self.realTimeLoggingOn = true; // log in real time (forwards to console.log)
-	self.useTimestamps = true; // insert a timestamp in front of each log
+	self.useTimestamps = false; // insert a timestamp in front of each log
 	self.useLocalStorage = false; // store the output using window.localStorage()
 	self.continuous = true; // if using localStorage, will continue to add to the same file each session, with dividers
 
@@ -113,6 +113,8 @@ function debugout() {
 					return obj;
 				}
 			case 'boolean' :
+				if (obj) return 'true';
+				else return 'false';
 			case 'number' :
 			case 'function' :
 				return obj;
@@ -181,7 +183,7 @@ function debugout() {
 		var secs = ('0' + timestamp.getSeconds()).slice(-2);
 		return '['+ year + '-' + month + '-' + date + ' ' + hrs + ':' + mins + ':'+secs + ']: ';
 	}
-	this.version = function () { return '0.1.0' }
+	this.version = function () { return '0.1.1' }
 
 	// resume and/or start log
 	if (self.useLocalStorage && self.continuous) {

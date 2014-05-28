@@ -13,7 +13,7 @@
 
     <script type="text/javascript" src="debugout.js"></script>
     <script type="text/javascript">
-    /*
+    
     (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
     (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
     m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
@@ -21,7 +21,6 @@
 
     ga('create', 'UA-7742845-9', 'inorganik.github.io');
     ga('send', 'pageview');
-    */
 
     </script>
 </head>
@@ -66,6 +65,14 @@
             <div class="col-inner-no-lr">
                 <p class="large weight300">Your application can access the log any time by using debugout's getLog() method, then you can do something with it, like letting the user download it.</p>
                 <input type="button" class="inlineLeft marginRight" value="Download log" onClick="downloadLog()" style="width:120px;">
+                <input type="button" class="inlineLeft marginRight" value="Display log" onClick="displayLog()" style="width:120px;">
+            </div>
+        </section>
+        <section class="marginBottom">
+            <div class="col full marginBottom marginTop">
+                <div class="code-contain marginBottom lime">
+                    <code id="codeVisualizer"></code>
+                </div>
             </div>
         </section>
     </div>
@@ -81,8 +88,7 @@
     var obj = {
         name: 'Jamie',
         age: 34,
-        arr: ['another', 'test', 'array', 4],
-        flag: true,
+        arr: ['another', 'test', 'array', 4, true, false],
         nestedObj: {
             apple: 'red',
             orange: 'orange',
@@ -94,7 +100,9 @@
                 green: 4
             }
         },
-        date: new Date()
+        date: new Date(),
+        flag: true,
+        anotherFlag: false,
     }
     // a date
     var d = new Date();
@@ -108,6 +116,7 @@
     var rgx = new RegExp(/debugout/);
     
     window.onload = function() {
+        document.getElementById('version').innerHTML = 'v'+bugout.version();
         // use debugout.log() instead of console.log()
         bugout.log('A date:');
         bugout.log(d);
@@ -122,8 +131,6 @@
     }
 
     function displayLog() {
-        bugout.log('will displayLog()');
-        // the core purpose for using debugout:
         var output = bugout.getLog();
         // print debugout's output in the browser window
         // but first, format for html
