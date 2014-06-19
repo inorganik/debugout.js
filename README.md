@@ -26,6 +26,7 @@ In the debugout() function definition, you can edit some things:
 - `self.useTimestamps = true;` - insert a timestamp in front of each log
 - `self.useLocalStorage = false;` - store the output using window.localStorage()
 - `self.continuous = true;` - if using localStorage, will keep adding to the same log file each session, with dividers
+- `self.recordLogs = true;` - set to false after you're done debugging to avoid the log eating up memory
 
 ### Methods
 
