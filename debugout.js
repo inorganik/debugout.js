@@ -2,7 +2,7 @@
 
     debugout.js
     by @inorganik
-    v 0.2.0
+    v 0.3.0
     
 */
 
@@ -15,6 +15,7 @@ function debugout() {
 	self.useTimestamps = false; // insert a timestamp in front of each log
 	self.useLocalStorage = false; // store the output using window.localStorage()
 	self.continuous = true; // if using localStorage, will continue to add to the same file each session, with dividers
+	self.recordLogs = true; // set to false after you're done debugging to avoid log eating up memory
 
 	// vars
 	self.depth = 0;
@@ -23,30 +24,32 @@ function debugout() {
 	self.startTime = new Date();
 	self.output = '';
 
-	this.version = function () { return '0.2.0' }
+	this.version = function () { return '0.3.0' }
 
 	this.log = function(obj) {
 		// log in real time
 		if (self.realTimeLoggingOn) console.log(obj);
 		// record log
 		var type = self.determineType(obj);
-		var addition = self.formatType(type, obj);
-		// timestamp, formatted for brevity
-		if (self.useTimestamps) {
-			var logTime = new Date();
-			self.output += self.formatTimestamp(logTime);
-		}
-		self.output += addition+'\n';
-		// local storage
-		if (self.useLocalStorage) {
-			var last = new Date();
-			var saveObject = {
-				startTime: self.startTime,
-				log: self.output,
-				lastLog: last
+		if (type != null && self.recordLogs) {
+			var addition = self.formatType(type, obj);
+			// timestamp, formatted for brevity
+			if (self.useTimestamps) {
+				var logTime = new Date();
+				self.output += self.formatTimestamp(logTime);
 			}
-			saveObject = JSON.stringify(saveObject);
-			window.localStorage.setItem('debugout.js', saveObject);
+			self.output += addition+'\n';
+			// local storage
+			if (self.useLocalStorage) {
+				var last = new Date();
+				var saveObject = {
+					startTime: self.startTime,
+					log: self.output,
+					lastLog: last
+				}
+				saveObject = JSON.stringify(saveObject);
+				window.localStorage.setItem('debugout.js', saveObject);
+			}
 		}
 		self.depth = 0;
 		self.parentSizes = [0];
@@ -55,27 +58,31 @@ function debugout() {
 	// like typeof but classifies objects of type 'object'
 	// kept separate from formatType() so you can use at your convenience!
 	this.determineType = function(object) {
-		var typeResult;
-		var type = typeof object;
-		if (type == 'object') {
-			var len = object.length;
-			if (len == null) {
-				if (typeof object.getTime == 'function') {
-					typeResult = 'Date';
-				}
-				else if (typeof object.test == 'function') {
-					typeResult = 'RegExp';
-				}
-				else {
-					typeResult = 'Object';
+		if (object != null) {
+			var typeResult;
+			var type = typeof object;
+			if (type == 'object') {
+				var len = object.length;
+				if (len == null) {
+					if (typeof object.getTime == 'function') {
+						typeResult = 'Date';
+					}
+					else if (typeof object.test == 'function') {
+						typeResult = 'RegExp';
+					}
+					else {
+						typeResult = 'Object';
+					}
+				} else {
+					typeResult = 'Array';
 				}
 			} else {
-				typeResult = 'Array';
+				typeResult = type;
 			}
+			return typeResult;
 		} else {
-			typeResult = type;
+			return null;
 		}
-		return typeResult;
 	}
 	// format type accordingly, recursively if necessary
 	this.formatType = function(type, obj) {
@@ -167,6 +174,10 @@ function debugout() {
 	}
 	this.getLog = function() {
 		var retrievalTime = new Date();
+		// so dev knows why they don't have any logs
+		if (!self.recordLogs) {
+			self.log('[debugout.js] log recording is off.');
+		}
 		// if using local storage, get values
 		if (self.useLocalStorage) {
 			var saved = window.localStorage.getItem('debugout.js');
