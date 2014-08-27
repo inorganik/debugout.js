@@ -5,7 +5,7 @@ debugout.js
 
 Some highlights of debugout:
 
-- access the entire log or just the end of the log (`tail()`) at any time
+- access the entire log or just the end of the log at any time
 - better understand usage patterns with optional timestamps
 - toggle `console.log` (live logging) in one place
 - optionally store the output in `window.localStorage` and continuously add to the same log each session
