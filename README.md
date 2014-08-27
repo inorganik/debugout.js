@@ -1,16 +1,15 @@
 debugout.js
 ===========
 
-(debug output) records and saves console logs, and makes it possible to send crash reports, download the log, or do something else - [see some examples below](#outputting).
+(debug output) generates a text document from console.logs that can be emailed, downloaded, `POST`ed, and more. [See some examples below](#outputting).
 
 Some highlights of debugout:
 
-- access the entire log at any time
+- access the entire log or just the end of the log (`tail()`) at any time
+- better understand usage patterns with optional timestamps
 - toggle `console.log` (live logging) in one place
 - optionally store the output in `window.localStorage` and continuously add to the same log each session
-- optionally add a timestamp to every log
-- automatically caps logs to the most recent 2500 lines to limit memory consumption
-- everything can be tweaked in the [options](#options). 
+- optionally cap the log to X number of lines to limit memory consumption
 
 ##[Try the demo](http://inorganik.github.io/debugout.js/)
 
@@ -24,19 +23,23 @@ var bugout = new debugout();
 // instead of console.log('some object or string')
 bugout.log('some object or string');
 ```
+Whatever you log is saved and added to the log file on a new line.
 
 ### Options <a name="options"></a>
 
 In the debugout function definition, you can edit options:
 
-- `self.realTimeLoggingOn = true;` - log in real time (forwards to console.log)
-- `self.useTimestamps = true;` - insert a timestamp in front of each log
-- `self.useLocalStorage = false;` - store the output using `window.localStorage()` and continuously add to the same log each session
-- `self.recordLogs = true;` - set to false after you're done debugging to avoid the log eating up memory
-- `self.autoTrim = true;` - to avoid the log eating up potentially endless memory
-- `self.maxLines = 2500;` - if autoTrim is true, this is how many lines the log is limited to
-- `self.tailNumLines = 100;` - how many lines `tail()` will retrieve
-- `self.logFilename = 'log.txt';` // filename of log downloaded with downloadLog()
+```js
+// OPTIONS
+self.realTimeLoggingOn = true; // log in real time (forwards to console.log)
+self.useTimestamps = false; // insert a timestamp in front of each log
+self.useLocalStorage = false; // store the output using window.localStorage() and continuously add to the same log each session
+self.recordLogs = true; // set to false after you're done debugging to avoid the log eating up memory
+self.autoTrim = true; // to avoid the log eating up potentially endless memory
+self.maxLines = 2500; // if autoTrim is true, this is how many lines the log is limited to
+self.tailNumLines = 100; // how many lines tail() will retrieve
+self.logFilename = 'log.txt'; // filename of log downloaded with downloadLog()
+```
 
 ### Methods
 
@@ -97,5 +100,12 @@ function fileSystemError(error) {
     bugout.log('Error getting file system: '+error.code);
 }
 ```
+##### And more...
+
+- Post the log to your server via an ajax request if an error or some other event occurs.
+- Allow the user to download a copy of a submitted form.
+- Generate a receipt for the user to download.
+- Record survey answers and know how long each question took the user to answer.
+
 
 
