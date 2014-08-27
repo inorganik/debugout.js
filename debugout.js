@@ -2,7 +2,6 @@
 
     debugout.js
     by @inorganik
-    v 0.3.0
     
 */
 
@@ -13,9 +12,12 @@ function debugout() {
 	// OPTIONS
 	self.realTimeLoggingOn = true; // log in real time (forwards to console.log)
 	self.useTimestamps = false; // insert a timestamp in front of each log
-	self.useLocalStorage = false; // store the output using window.localStorage()
-	self.continuous = true; // if using localStorage, will continue to add to the same file each session, with dividers
-	self.recordLogs = true; // set to false after you're done debugging to avoid log eating up memory
+	self.useLocalStorage = false; // store the output using window.localStorage() and continuously add to the same log each session
+	self.recordLogs = true; // set to false after you're done debugging to avoid the log eating up memory
+	self.autoTrim = true; // to avoid the log eating up potentially endless memory
+	self.maxLines = 2500; // if autoTrim is true, this is how many lines the log is limited to
+	self.tailNumLines = 100; // how many lines tail() will retrieve
+	self.logFilename = 'log.txt'; // filename of log downloaded with downloadLog()
 
 	// vars
 	self.depth = 0;
@@ -24,7 +26,7 @@ function debugout() {
 	self.startTime = new Date();
 	self.output = '';
 
-	this.version = function () { return '0.3.0' }
+	this.version = function() { return '0.4.0' }
 
 	this.log = function(obj) {
 		// log in real time
@@ -39,6 +41,7 @@ function debugout() {
 				self.output += self.formatTimestamp(logTime);
 			}
 			self.output += addition+'\n';
+			if (self.autoTrim) self.output = self.trimLog(self.output, self.maxLines);
 			// local storage
 			if (self.useLocalStorage) {
 				var last = new Date();
@@ -152,7 +155,7 @@ function debugout() {
 				break;
 			case 'Date' :
 			case 'string' : 
-				if (self.depth > 0) {
+				if (self.depth > 0 || obj.length == 0) {
 					return '"'+obj+'"';
 				} else {
 					return obj;
@@ -161,7 +164,7 @@ function debugout() {
 				if (obj) return 'true';
 				else return 'false';
 			case 'number' :
-				return obj;
+				return obj+'';
 				break;
 		}
 	}
@@ -171,6 +174,16 @@ function debugout() {
 			str += '\t';
 		}
 		return str;
+	}
+	this.trimLog = function(log, maxLines) {
+		var lines = log.split('\n');
+		if (lines.length > maxLines) {
+			lines = lines.slice(lines.length - maxLines);
+		}
+		return lines.join('\n');
+	}
+	this.lines = function() {
+		return self.output.split('\n').length;
 	}
 	this.getLog = function() {
 		var retrievalTime = new Date();
@@ -190,8 +203,23 @@ function debugout() {
 		}
 		self.output += '\n---- Log retrieved: '+retrievalTime+' ----\n';
 		self.output += self.formatSessionDuration(self.startTime, retrievalTime);
-		if (self.realTimeLoggingOn) console.log('[debugout.js] getLog()');
 		return self.output
+	}
+	this.tail = function() {
+		return self.trimLog(self.getLog(), self.tailLines);
+	}
+	this.downloadLog = function() {
+	    var file = "data:text/plain;charset=utf-8,";
+	    var logFile = self.getLog();
+	    var encoded = encodeURIComponent(logFile);
+	    file += encoded;
+	    var a = document.createElement('a');
+	    a.href = file;
+	    a.target   = '_blank';
+	    a.download = self.logFilename;
+	    document.body.appendChild(a);
+	    a.click();
+	    a.remove();
 	}
 	this.clear = function() {
 		var clearTime = new Date();
@@ -240,7 +268,7 @@ function debugout() {
 	}
 
 	// resume and/or start log
-	if (self.useLocalStorage && self.continuous) {
+	if (self.useLocalStorage) {
 		var saved = window.localStorage.getItem('debugout.js');
 		if (saved) {
 			saved = JSON.parse(saved);

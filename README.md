@@ -1,15 +1,22 @@
 debugout.js
 ===========
 
-(debug output) records and saves console logs so that your application can access them, for the purpose of debugging an app while it's in beta. 
+(debug output) records and saves console logs, and makes it possible to send crash reports, download the log, or do something else - [see some examples below](#outputting).
 
-Then you can add a button for the tester to download the log, or do something else ([see examples](#outputting)).
+Some highlights of debugout:
+
+- access the entire log at any time
+- toggle `console.log` (live logging) in one place
+- optionally store the output in `window.localStorage` and continuously add to the same log each session
+- optionally add a timestamp to every log
+- automatically caps logs to the most recent 2500 lines to limit memory consumption
+- everything can be tweaked in the [options](#options). 
 
 ##[Try the demo](http://inorganik.github.io/debugout.js/)
 
 ### Usage
 
-Create a new debugout object and replace all your console log methods with debugout's log method:
+Create a new debugout object at the top of your script and replace all your console log methods with debugout's log method:
 
 ```js
 var bugout = new debugout();
@@ -18,35 +25,31 @@ var bugout = new debugout();
 bugout.log('some object or string');
 ```
 
-### Options
+### Options <a name="options"></a>
 
-In the debugout() function definition, you can edit some things:
+In the debugout function definition, you can edit options:
 
-- `self.realTimeLoggingOn = true;` - log in real time (toggles console.log)
+- `self.realTimeLoggingOn = true;` - log in real time (forwards to console.log)
 - `self.useTimestamps = true;` - insert a timestamp in front of each log
-- `self.useLocalStorage = false;` - store the output using window.localStorage()
-- `self.continuous = true;` - if using localStorage, will keep adding to the same log file each session, with dividers
+- `self.useLocalStorage = false;` - store the output using `window.localStorage()` and continuously add to the same log each session
 - `self.recordLogs = true;` - set to false after you're done debugging to avoid the log eating up memory
+- `self.autoTrim = true;` - to avoid the log eating up potentially endless memory
+- `self.maxLines = 2500;` - if autoTrim is true, this is how many lines the log is limited to
+- `self.tailNumLines = 100;` - how many lines `tail()` will retrieve
+- `self.logFilename = 'log.txt';` // filename of log downloaded with downloadLog()
 
 ### Methods
 
-- `log()` - like `console.log()` only as though you "pressed record".
-- `getLog()` - get yer log.
-- `clear()` - clear the current log.
+- `log()` - like `console.log()`, but saved!
+- `getLog()` - returns the entire log.
+- `tail()` - returns just the last 100 lines of the log.
+- `downloadLog()` - downloads a .txt file of the log. [See example below](#outputting).
+- `clear()` - clears the log.
 - `determineType()` - a more granular version of `typeof` for your convenience
 
-### Advantages
+### Outputting examples <a name="outputting"></a>
 
-- Have an idea what's going on when a client/tester reports a bug
-- Dependency-free and lightweight
-- Toggle console logging on and off in one place
-- Know when things happened, and how long a client/tester was using your app
-
-### Outputting the log <a name="outputting"></a>
-
-Debugout.js provides a method for you to output the log, but it's up to you to do something with it. Here are a couple examples of what you can do after you use the `getLog()` method.
-
-Each example assumes that you have established a `debugout` object and are logging with it:
+Here are a couple examples of what you can do with the log. Each example assumes that you have established a `debugout` object and are logging with it:
 
 ```js
 var bugout = new debugout.js
@@ -57,31 +60,15 @@ bugout.log('etc');
 
 ##### Example #1: Button that downloads the log as a .txt file
 
+Simply call debugout's `downloadLog()` method. You can change the filename by editing `self.logFilename`.
+
 ```html
-<input type="button" value="Download log" onClick="downloadLog()">
+<input type="button" value="Download log" onClick="bugout.downloadLog()">
 ````
 
-```js
-function downloadLog() {
-	var file = "data:text/plain;charset=utf-8,";
-	var logFile = bugout.getLog();
-	var encoded = encodeURIComponent(logFile);
-	file += encoded;
+##### Example #2: PhoneGap app that attaches the log to an email
 
-	var a = document.createElement('a');
-	a.href = file;
-	a.target   = '_blank';
-	a.download = 'myApp_log.txt';
-	document.body.appendChild(a);
-	a.click();
-	a.remove();
-}
-
-```
-
-##### Example #2: PhoneGap app with [Email Composer plugin](https://github.com/inorganik/cordova-emailComposerWithAttachments) that attaches the log to an email
-
-Example shown also requires the File plugin: `cordova plugin add org.apache.cordova.file`.
+Example shown uses the [Email Composer plugin](https://github.com/inorganik/cordova-emailComposerWithAttachments) and also requires the File plugin: `cordova plugin add org.apache.cordova.file`.
 
 ```js
 function sendLog() {
@@ -106,7 +93,6 @@ function sendLog() {
 		}, fileSystemError);
 	}, fileSystemError);
 }
-
 function fileSystemError(error) {
     bugout.log('Error getting file system: '+error.code);
 }

@@ -1,6 +1,13 @@
 # Changelog
 
-### v 0.0.3 (6/19/14)
+### v 0.4.0 (8/26/14)
+
+- Added Auto-trim feature to keep the log capped at the most recent 2500 lines
+- Added `tail()` to just get just the last 100 lines
+- Added `downloadLog()`
+- Fixed a bug where nested zeroes wouldn't log
+
+### v 0.3.0 (6/19/14)
 
 - Added changelog
 - fixed a bug where determineType() would try to evaluate a null object
