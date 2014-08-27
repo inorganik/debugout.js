@@ -15,7 +15,7 @@ function debugout() {
 	self.useLocalStorage = false; // store the output using window.localStorage() and continuously add to the same log each session
 	self.recordLogs = true; // set to false after you're done debugging to avoid the log eating up memory
 	self.autoTrim = true; // to avoid the log eating up potentially endless memory
-	self.maxLines = 2500; // if autoTrim is true, this is how many lines the log is limited to
+	self.maxLines = 2500; // if autoTrim is true, this many most recent lines are saved
 	self.tailNumLines = 100; // how many lines tail() will retrieve
 	self.logFilename = 'log.txt'; // filename of log downloaded with downloadLog()
 

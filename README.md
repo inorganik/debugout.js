@@ -9,7 +9,7 @@ Some highlights of debugout:
 - better understand usage patterns with optional timestamps
 - toggle `console.log` (live logging) in one place
 - optionally store the output in `window.localStorage` and continuously add to the same log each session
-- optionally cap the log to X number of lines to limit memory consumption
+- optionally cap the log to X most recent lines to limit memory consumption
 
 ##[Try the demo](http://inorganik.github.io/debugout.js/)
 
@@ -36,7 +36,7 @@ self.useTimestamps = false; // insert a timestamp in front of each log
 self.useLocalStorage = false; // store the output using window.localStorage() and continuously add to the same log each session
 self.recordLogs = true; // set to false after you're done debugging to avoid the log eating up memory
 self.autoTrim = true; // to avoid the log eating up potentially endless memory
-self.maxLines = 2500; // if autoTrim is true, this is how many lines the log is limited to
+self.maxLines = 2500; // if autoTrim is true, this many most recent lines are saved
 self.tailNumLines = 100; // how many lines tail() will retrieve
 self.logFilename = 'log.txt'; // filename of log downloaded with downloadLog()
 ```
