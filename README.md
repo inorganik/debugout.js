@@ -49,7 +49,7 @@ self.logFilename = 'log.txt'; // filename of log downloaded with downloadLog()
 - `getLog()` - returns the entire log.
 - `tail(numLines)` - returns the last X lines of the log, where X is the number you pass. Defaults to 100.
 - `search(string)` - returns numbered lines where there were matches for your search. Pass a string.
-- `getSlice(start, numLines) - get a 'slice' of the log. Pass the starting line and how many lines after it you want
+- `getSlice(start, numLines)` - get a 'slice' of the log. Pass the starting line and how many lines after it you want
 - `downloadLog()` - downloads a .txt file of the log. [See example below](#outputting).
 - `clear()` - clears the log.
 - `determineType()` - a more granular version of `typeof` for your convenience
