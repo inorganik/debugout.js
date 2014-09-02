@@ -3,6 +3,8 @@ debugout.js
 
 (debug output) generates a text document from console.logs that can be emailed, downloaded, `POST`ed, and more. [See some examples below](#outputting).
 
+Debugout accepts any type of object including functions. Debugout is not a monkey patch, but a separate logging class altogether that you use instead of `console`.
+
 Some highlights of debugout:
 
 - access the entire log or just the end of the log at any time
