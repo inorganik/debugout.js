@@ -1,5 +1,11 @@
 # Changelog
 
+### v 0.5.0 (9/02/14)
+
+- Added `search()` 
+- Added `getSlice()` 
+- Removed logging of `getLog()`
+
 ### v 0.4.0 (8/26/14)
 
 - Added Auto-trim feature to keep the log capped at the most recent 2500 lines

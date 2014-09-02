@@ -26,7 +26,7 @@ function debugout() {
 	self.startTime = new Date();
 	self.output = '';
 
-	this.version = function() { return '0.4.0' }
+	this.version = function() { return '0.5.0' }
 
 	this.log = function(obj) {
 		// log in real time
@@ -201,12 +201,33 @@ function debugout() {
 				retrievalTime = new Date(saved.lastLog);
 			}
 		}
-		self.output += '\n---- Log retrieved: '+retrievalTime+' ----\n';
-		self.output += self.formatSessionDuration(self.startTime, retrievalTime);
-		return self.output
+		return self.output +
+			'\n---- Log retrieved: '+retrievalTime+' ----\n' +
+			self.formatSessionDuration(self.startTime, retrievalTime);
 	}
-	this.tail = function() {
-		return self.trimLog(self.getLog(), self.tailLines);
+	this.tail = function(numLines) {
+		var numLines = numLines || self.tailLines;
+		return self.trimLog(self.getLog(), numLines);
+	}
+	this.search = function(string) {
+		var lines = self.output.split('\n');
+		var rgx = new RegExp(string);
+		var matched = [];
+		// can't use a simple Array.prototype.filter() here
+		// because we need to add the line number
+		for (var i = 0; i < lines.length; i++) {
+			var addr = '['+i+'] ';
+			if (lines[i].match(rgx)) {
+				matched.push(addr + lines[i]);
+			}
+		}
+		return matched.join('\n');
+	}
+	// accepts the starting line and how many lines after the starting line you want
+	this.getSlice = function(lineNumber, numLines) {
+		var lines = self.output.split('\n');
+		var segment = lines.slice(lineNumber, lineNumber + numLines);
+		return segment.join('\n');
 	}
 	this.downloadLog = function() {
 	    var file = "data:text/plain;charset=utf-8,";
