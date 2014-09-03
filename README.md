@@ -1,7 +1,7 @@
 debugout.js
 ===========
 
-(debug output) generates a log file from your logs that can be searched, downloaded, POSTed, emailed, and more. [See some examples below](#outputting).
+(debug output) generates a text file from your logs that can be searched, timestamped, downloaded and more. [See some examples below](#outputting).
 
 Debugout's `log()` accepts any type of object including functions. Debugout is not a monkey patch, but a separate logging class altogether that you use instead of `console`.
 
