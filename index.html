@@ -9,7 +9,7 @@
 
     <title>debugout.js</title>
 
-    <link rel="stylesheet" type="text/css" href="../assets/css/style.css?v=20140820">
+    <link rel="stylesheet" type="text/css" href="../inorganik.github.io/assets/css/style.css?v=20140820">
 
     <script type="text/javascript" src="debugout.js"></script>
     <script type="text/javascript">
@@ -40,11 +40,11 @@
         </section>
         <section>
             <div class="col-inner-no-lr">
-                <p class="large weight300 noMargin">Create a new debugout object and replace all your console log methods with debugout's log() method: </p>
+                <p class="large weight300 noMargin">Create a new debugout object and replace all your console logs with debugout's log method: </p>
             </div>
         </section>
-        <section class="marginBottom">
-            <div class="col full marginBottom marginTop">
+        <section>
+            <div class="col full marginTop">
                 <div class="code-contain marginBottom indigo">
                     <code>var bugout = new debugout();<br>
                         bugout.log('A date:');<br>
@@ -64,16 +64,30 @@
             </div>
         </section>
         <section>
-            <div class="col-inner-no-lr">
-                <p class="large weight300">Your application can access the log any time by using debugout's getLog() method, then you can do something with it, like letting the user download it.</p>
-                <input type="button" class="inlineLeft marginRight" value="Download log" onClick="bugout.downloadLog()" style="width:120px;">
-                <input type="button" class="inlineLeft marginRight" value="Display log" onClick="displayLog()" style="width:120px;">
-            </div>
+            <form>
+                <h4 class="inlineLeft noMargin marginRight weight300">Get the log at run-time or any time with these methods:</h4>
+                <input type="button" class="inlineLeft marginRight" value="download log" onClick="demoDownloadLog()" style="width:120px;">
+                <input type="button" class="inlineLeft marginRight" value="get log" onClick="demoGetLog()" style="width:100px;">
+                <input type="button" class="inlineLeft marginRight" value="tail" onClick="demoTail()" style="width:100px;">
+            </form>
+        </section>
+        <section>
+            <form>
+                <h4 class="inlineLeft noMargin marginRight weight300">Also, search:</h4>
+                <input type="text" class="inlineLeft" value="" id="search" style="width:140px; margin-right:5px" placeholder="ex: subgenre">
+                <input type="button" class="inlineLeft marginRight" value="search" onClick="demoSearch()" style="width:100px;">
+
+                <h4 class="inlineLeft noMargin marginRight weight300">And slice:</h4>
+                <input type="number" class="inlineLeft" value="" step="1" id="sliceStart" style="width:80px; margin-right:5px" placeholder="line">
+                <input type="number" class="inlineLeft marginRight" value="" step="1" id="sliceNumLines" style="width:80px" placeholder="# of lines">
+                <input type="button" class="inlineLeft" value="get slice" onClick="demoGetSlice()" style="width:100px;">
+            </form>
         </section>
         <section class="marginBottom">
             <div class="col full marginBottom marginTop">
-                <div class="code-contain marginBottom lime">
-                    <code id="codeVisualizer">// click 'Display log' to output the log here</code>
+                <h4 class="weight300">Console window:</h4>
+                <div class="code-contain marginBottom lime" style="min-height:500px">
+                    <code id="codeVisualizer">// Use a method above and output will be displayed here</code>
                 </div>
             </div>
         </section>
@@ -139,8 +153,37 @@
         bugout.log(arrayWithObjects);
     }
 
-    function displayLog() {
-        var output = bugout.getLog();
+    function demoDownloadLog() {
+        var output = "bugout.downloadLog();";
+        bugout.downloadLog();
+        displayOutput(output);
+    }
+    function demoGetLog() {
+        var output = "bugout.getLog();\n";
+        output += bugout.getLog();
+        displayOutput(output);
+    }
+    function demoTail() {
+        var output = "bugout.tail(20);\n";
+        output += bugout.tail(20);
+        displayOutput(output);
+    }
+    function demoSearch() {
+        var term = document.getElementById('search').value;
+        var output = "bugout.search('"+term+"'');\n";
+        output += bugout.search(term);
+        displayOutput(output);
+    }
+    function demoGetSlice() {
+        var startLine = Number(document.getElementById('sliceStart').value);
+        var numLines = Number(document.getElementById('sliceNumLines').value);
+        var output = "bugout.getSlice("+startLine+", "+numLines+");\n\n";
+        output += bugout.getSlice(startLine, numLines);
+        displayOutput(output);
+    }
+    function displayOutput(output) {
+        // simulate console
+        console.log(output);
         // format for html
         output = output.replace(/\n/g, '<br>').replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
         document.getElementById('codeVisualizer').innerHTML = output;

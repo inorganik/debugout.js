@@ -17,7 +17,7 @@ function debugout() {
 	self.autoTrim = true; // to avoid the log eating up potentially endless memory
 	self.maxLines = 2500; // if autoTrim is true, this many most recent lines are saved
 	self.tailNumLines = 100; // how many lines tail() will retrieve
-	self.logFilename = 'log.txt'; // filename of log downloaded with downloadLog()
+	self.logFilename = 'debugout.txt'; // filename of log downloaded with downloadLog()
 
 	// vars
 	self.depth = 0;
@@ -28,6 +28,88 @@ function debugout() {
 
 	this.version = function() { return '0.5.0' }
 
+	/*
+		USER METHODS
+	*/	
+	this.getLog = function() {
+		var retrievalTime = new Date();
+		// if recording is off, so dev knows why they don't have any logs
+		if (!self.recordLogs) {
+			self.log('[debugout.js] log recording is off.');
+		}
+		// if using local storage, get values
+		if (self.useLocalStorage) {
+			var saved = window.localStorage.getItem('debugout.js');
+			if (saved) {
+				saved = JSON.parse(saved);
+				self.startTime = new Date(saved.startTime);
+				self.output = saved.log;
+				retrievalTime = new Date(saved.lastLog);
+			}
+		}
+		return self.output
+			+ '\n---- Log retrieved: '+retrievalTime+' ----\n'
+			+ self.formatSessionDuration(self.startTime, retrievalTime);
+	}
+	// accepts optional number or uses the default for number of lines
+	this.tail = function(numLines) {
+		var numLines = numLines || self.tailLines;
+		return self.trimLog(self.getLog(), numLines);
+	}
+	// accepts a string to search for
+	this.search = function(string) {
+		var lines = self.output.split('\n');
+		var rgx = new RegExp(string);
+		var matched = [];
+		// can't use a simple Array.prototype.filter() here
+		// because we need to add the line number
+		for (var i = 0; i < lines.length; i++) {
+			var addr = '['+i+'] ';
+			if (lines[i].match(rgx)) {
+				matched.push(addr + lines[i]);
+			}
+		}
+		var result = matched.join('\n');
+		if (result.length == 0) result = 'Nothing found for "'+string+'".';
+		return result
+	}
+	// accepts the starting line and how many lines after the starting line you want
+	this.getSlice = function(lineNumber, numLines) {
+		var lines = self.output.split('\n');
+		var segment = lines.slice(lineNumber, lineNumber + numLines);
+		return segment.join('\n');
+	}
+	// immediately downloads the log - for desktop browser use
+	this.downloadLog = function() {
+	    var file = "data:text/plain;charset=utf-8,";
+	    var logFile = self.getLog();
+	    var encoded = encodeURIComponent(logFile);
+	    file += encoded;
+	    var a = document.createElement('a');
+	    a.href = file;
+	    a.target   = '_blank';
+	    a.download = self.logFilename;
+	    document.body.appendChild(a);
+	    a.click();
+	    a.remove();
+	}
+	// clears the log
+	this.clear = function() {
+		var clearTime = new Date();
+		self.output = '---- Log cleared: '+clearTime+' ----\n';
+		if (self.useLocalStorage) {
+			// local storage
+			var saveObject = {
+				startTime: self.startTime,
+				log: self.output,
+				lastLog: clearTime
+			}
+			saveObject = JSON.stringify(saveObject);
+			window.localStorage.setItem('debugout.js', saveObject);
+		}
+		if (self.realTimeLoggingOn) console.log('[debugout.js] clear()');
+	}
+	// records a log
 	this.log = function(obj) {
 		// log in real time
 		if (self.realTimeLoggingOn) console.log(obj);
@@ -58,6 +140,10 @@ function debugout() {
 		self.parentSizes = [0];
 		self.currentResult = '';
 	}
+	/*
+		METHODS FOR CONSTRUCTING THE LOG
+	*/
+
 	// like typeof but classifies objects of type 'object'
 	// kept separate from formatType() so you can use at your convenience!
 	this.determineType = function(object) {
@@ -185,78 +271,6 @@ function debugout() {
 	this.lines = function() {
 		return self.output.split('\n').length;
 	}
-	this.getLog = function() {
-		var retrievalTime = new Date();
-		// so dev knows why they don't have any logs
-		if (!self.recordLogs) {
-			self.log('[debugout.js] log recording is off.');
-		}
-		// if using local storage, get values
-		if (self.useLocalStorage) {
-			var saved = window.localStorage.getItem('debugout.js');
-			if (saved) {
-				saved = JSON.parse(saved);
-				self.startTime = new Date(saved.startTime);
-				self.output = saved.log;
-				retrievalTime = new Date(saved.lastLog);
-			}
-		}
-		return self.output +
-			'\n---- Log retrieved: '+retrievalTime+' ----\n' +
-			self.formatSessionDuration(self.startTime, retrievalTime);
-	}
-	this.tail = function(numLines) {
-		var numLines = numLines || self.tailLines;
-		return self.trimLog(self.getLog(), numLines);
-	}
-	this.search = function(string) {
-		var lines = self.output.split('\n');
-		var rgx = new RegExp(string);
-		var matched = [];
-		// can't use a simple Array.prototype.filter() here
-		// because we need to add the line number
-		for (var i = 0; i < lines.length; i++) {
-			var addr = '['+i+'] ';
-			if (lines[i].match(rgx)) {
-				matched.push(addr + lines[i]);
-			}
-		}
-		return matched.join('\n');
-	}
-	// accepts the starting line and how many lines after the starting line you want
-	this.getSlice = function(lineNumber, numLines) {
-		var lines = self.output.split('\n');
-		var segment = lines.slice(lineNumber, lineNumber + numLines);
-		return segment.join('\n');
-	}
-	this.downloadLog = function() {
-	    var file = "data:text/plain;charset=utf-8,";
-	    var logFile = self.getLog();
-	    var encoded = encodeURIComponent(logFile);
-	    file += encoded;
-	    var a = document.createElement('a');
-	    a.href = file;
-	    a.target   = '_blank';
-	    a.download = self.logFilename;
-	    document.body.appendChild(a);
-	    a.click();
-	    a.remove();
-	}
-	this.clear = function() {
-		var clearTime = new Date();
-		self.output = '---- Log cleared: '+clearTime+' ----\n';
-		if (self.useLocalStorage) {
-			// local storage
-			var saveObject = {
-				startTime: self.startTime,
-				log: self.output,
-				lastLog: clearTime
-			}
-			saveObject = JSON.stringify(saveObject);
-			window.localStorage.setItem('debugout.js', saveObject);
-		}
-		if (self.realTimeLoggingOn) console.log('[debugout.js] clear()');
-	}
 	// calculate testing time
 	this.formatSessionDuration = function(startTime, endTime) {
 		var msec = endTime - startTime;
@@ -288,7 +302,9 @@ function debugout() {
 	    return size;
 	}
 
-	// resume and/or start log
+	/*
+		START/RESUME LOG
+	*/
 	if (self.useLocalStorage) {
 		var saved = window.localStorage.getItem('debugout.js');
 		if (saved) {

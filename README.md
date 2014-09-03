@@ -1,15 +1,16 @@
 debugout.js
 ===========
 
-(debug output) generates a text document from console.logs that can be emailed, downloaded, `POST`ed, and more. [See some examples below](#outputting).
+(debug output) generates a log file from your logs that can be searched, downloaded, POSTed, emailed, and more. [See some examples below](#outputting).
 
-Debugout accepts any type of object including functions. Debugout is not a monkey patch, but a separate logging class altogether that you use instead of `console`.
+Debugout's `log()` accepts any type of object including functions. Debugout is not a monkey patch, but a separate logging class altogether that you use instead of `console`.
 
 Some highlights of debugout:
 
-- access the entire log or just the end of the log at any time
+- get the entire log, or the tail at run-time or any time
+- search and slice the log
 - better understand usage patterns with optional timestamps
-- toggle `console.log` (live logging) in one place
+- toggle live logging (console.log) in one place
 - optionally store the output in `window.localStorage` and continuously add to the same log each session
 - optionally cap the log to X most recent lines to limit memory consumption
 
@@ -17,7 +18,7 @@ Some highlights of debugout:
 
 ### Usage
 
-Create a new debugout object at the top of your script and replace all your console log methods with debugout's log method:
+Create a new debugout object in the global namespace, at the top of your script, and replace all your console log methods with debugout's log method:
 
 ```js
 var bugout = new debugout();
@@ -26,22 +27,6 @@ var bugout = new debugout();
 bugout.log('some object or string');
 ```
 Whatever you log is saved and added to the log file on a new line.
-
-### Options <a name="options"></a>
-
-In the debugout function definition, you can edit options:
-
-```js
-// OPTIONS
-self.realTimeLoggingOn = true; // log in real time (forwards to console.log)
-self.useTimestamps = false; // insert a timestamp in front of each log
-self.useLocalStorage = false; // store the output using window.localStorage() and continuously add to the same log each session
-self.recordLogs = true; // set to false after you're done debugging to avoid the log eating up memory
-self.autoTrim = true; // to avoid the log eating up potentially endless memory
-self.maxLines = 2500; // if autoTrim is true, this many most recent lines are saved
-self.tailNumLines = 100; // how many lines tail() will retrieve
-self.logFilename = 'log.txt'; // filename of log downloaded with downloadLog()
-```
 
 ### Methods
 
@@ -53,6 +38,29 @@ self.logFilename = 'log.txt'; // filename of log downloaded with downloadLog()
 - `downloadLog()` - downloads a .txt file of the log. [See example below](#outputting).
 - `clear()` - clears the log.
 - `determineType()` - a more granular version of `typeof` for your convenience
+
+### Options <a name="options"></a>
+
+In the debugout function definition, you can edit options:
+
+```js
+// log in real time (forwards to console.log)
+self.realTimeLoggingOn = true; 
+// insert a timestamp in front of each log
+self.useTimestamps = false; 
+// store the output using window.localStorage() and continuously add to the same log each session
+self.useLocalStorage = false; 
+// set to false after you're done debugging to avoid the log eating up memory
+self.recordLogs = true; 
+// to avoid the log eating up potentially endless memory
+self.autoTrim = true; 
+// if autoTrim is true, this many most recent lines are saved
+self.maxLines = 2500; 
+// how many lines tail() will retrieve
+self.tailNumLines = 100; 
+// filename of log downloaded with downloadLog()
+self.logFilename = 'log.txt';
+```
 
 ### Outputting examples <a name="outputting"></a>
 
@@ -104,7 +112,7 @@ function fileSystemError(error) {
     bugout.log('Error getting file system: '+error.code);
 }
 ```
-##### And more...
+### And more...
 
 - Post the log to your server via an ajax request if an error or some other event occurs.
 - Allow the user to download a copy of a submitted form.

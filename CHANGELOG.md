@@ -5,6 +5,7 @@
 - Added `search()` 
 - Added `getSlice()` 
 - Removed logging of `getLog()`
+- Improved demo, README
 
 ### v 0.4.0 (8/26/14)
 
