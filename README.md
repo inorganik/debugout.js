@@ -67,7 +67,7 @@ self.logFilename = 'log.txt';
 Here are a couple examples of what you can do with the log. Each example assumes that you have established a `debugout` object and are logging with it:
 
 ```js
-var bugout = new debugout.js
+var bugout = new debugout();
 bugout.log('something');
 bugout.log(somethingElse);
 bugout.log('etc');
