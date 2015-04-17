@@ -2,7 +2,7 @@
 
     debugout.js
     by @inorganik
-    
+
 */
 
 // save all the console.logs
@@ -30,7 +30,7 @@ function debugout() {
 
 	/*
 		USER METHODS
-	*/	
+	*/
 	this.getLog = function() {
 		var retrievalTime = new Date();
 		// if recording is off, so dev knows why they don't have any logs
@@ -177,70 +177,79 @@ function debugout() {
 	this.formatType = function(type, obj) {
 		switch(type) {
 			case 'Object' :
-				self.currentResult += '{\n';
+				var buffer = [];
+				buffer.push(self.currentResult);
+				buffer.push('{\n');
 				self.depth++;
 				self.parentSizes.push(self.objectSize(obj));
 				var i = 0;
 				for (var prop in obj) {
-					self.currentResult += self.indentsForDepth(self.depth);
-					self.currentResult += prop + ': ';
+					buffer.push(self.indentsForDepth(self.depth));
+					buffer.push(prop + ': ');
 					var subtype = self.determineType(obj[prop]);
 					var subresult = self.formatType(subtype, obj[prop]);
 					if (subresult) {
-						self.currentResult += subresult;
-						if (i != self.parentSizes[self.depth]-1) self.currentResult += ',';
-						self.currentResult += '\n';
+						buffer.push(subresult);
+						if (i != self.parentSizes[self.depth]-1) buffer.push(',');
+						buffer.push('\n');
 					} else {
-						if (i != self.parentSizes[self.depth]-1) self.currentResult += ',';
-						self.currentResult += '\n';
+						if (i != self.parentSizes[self.depth]-1) buffer.push(',');
+						buffer.push('\n');
 					}
 					i++;
 				}
 				self.depth--;
 				self.parentSizes.pop();
-				self.currentResult += self.indentsForDepth(self.depth);
-				self.currentResult += '}';
+				buffer.push(self.indentsForDepth(self.depth));
+				buffer.push('}');
+				self.currentResult = buffer.join();
 				if (self.depth == 0) return self.currentResult;
 				break;
 			case 'Array' :
-				self.currentResult += '[';
+				var buffer = [];
+				buffer.push(self.currentResult);
+				buffer.push('[');
 				self.depth++;
 				self.parentSizes.push(obj.length);
 				for (var i = 0; i < obj.length; i++) {
 					var subtype = self.determineType(obj[i]);
-					if (subtype == 'Object' || subtype == 'Array') self.currentResult += '\n' + self.indentsForDepth(self.depth);
+					if (subtype == 'Object' || subtype == 'Array') buffer.push('\n' + self.indentsForDepth(self.depth));
 					var subresult = self.formatType(subtype, obj[i]);
 					if (subresult) {
-						self.currentResult += subresult;
-						if (i != self.parentSizes[self.depth]-1) self.currentResult += ', ';
-						if (subtype == 'Array') self.currentResult += '\n';
+						buffer.push(subresult);
+						if (i != self.parentSizes[self.depth]-1) buffer.push(', ');
+						if (subtype == 'Array') buffer.push(self.currentResult);
 					} else {
-						if (i != self.parentSizes[self.depth]-1) self.currentResult += ', ';
-						if (subtype != 'Object') self.currentResult += '\n';
-						else if (i == self.parentSizes[self.depth]-1) self.currentResult += '\n';
+						if (i != self.parentSizes[self.depth]-1) buffer.push(', ');
+						if (subtype != 'Object') buffer.push(self.currentResult);
+						else if (i == self.parentSizes[self.depth]-1) buffer.push('\n');
 					}
 				}
 				self.depth--;
 				self.parentSizes.pop();
-				self.currentResult += ']';
+				buffer.push(']');
+				self.currentResult = buffer.join();
 				if (self.depth == 0) return self.currentResult;
 				break;
 			case 'function' :
 				obj += '';
+				var buffer = [];
+				buffer.push(self.currentResult);
 				var lines = obj.split('\n');
 				for (var i = 0; i < lines.length; i++) {
 					if (lines[i].match(/\}/)) self.depth--;
-					self.currentResult += self.indentsForDepth(self.depth);
+					buffer.push(self.indentsForDepth(self.depth));
 					if (lines[i].match(/\{/)) self.depth++;
-					self.currentResult += lines[i] + '\n';
+					buffer.push(lines[i] + '\n');
 				}
+				self.currentResult = buffer.join();
 				return self.currentResult;
 				break;
 			case 'RegExp' :
 				return '/'+obj.source+'/';
 				break;
 			case 'Date' :
-			case 'string' : 
+			case 'string' :
 				if (self.depth > 0 || obj.length == 0) {
 					return '"'+obj+'"';
 				} else {
@@ -289,7 +298,7 @@ function debugout() {
 		var year = timestamp.getFullYear();
 		var date = timestamp.getDate();
 		var month = ('0' + (timestamp.getMonth() +1)).slice(-2);
-		var hrs = Number(timestamp.getHours()); 
+		var hrs = Number(timestamp.getHours());
 		var mins = ('0' + timestamp.getMinutes()).slice(-2);
 		var secs = ('0' + timestamp.getSeconds()).slice(-2);
 		return '['+ year + '-' + month + '-' + date + ' ' + hrs + ':' + mins + ':'+secs + ']: ';
@@ -316,6 +325,6 @@ function debugout() {
 			self.output += self.formatSessionDuration(start, end);
 			self.output += '\n\n';
 		}
-	} 
+	}
 	self.output += '---- Session started: '+self.startTime+' ----\n\n';
 }
