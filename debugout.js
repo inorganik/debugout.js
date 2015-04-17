@@ -22,7 +22,7 @@ function debugout() {
 	// vars
 	self.depth = 0;
 	self.parentSizes = [0];
-	self.currentResult = '';
+	self.currentResult = [];
 	self.startTime = new Date();
 	self.output = '';
 
@@ -138,7 +138,7 @@ function debugout() {
 		}
 		self.depth = 0;
 		self.parentSizes = [0];
-		self.currentResult = '';
+		self.currentResult = [];
 	}
 	/*
 		METHODS FOR CONSTRUCTING THE LOG
@@ -177,91 +177,77 @@ function debugout() {
 	this.formatType = function(type, obj) {
 		switch(type) {
 			case 'Object' :
-				var buffer = [];
-				buffer.push(self.currentResult);
-				buffer.push('{\n');
+				self.currentResult.push('{\n');
 				self.depth++;
 				self.parentSizes.push(self.objectSize(obj));
 				var i = 0;
 				for (var prop in obj) {
-					buffer.push(self.indentsForDepth(self.depth));
-					buffer.push(prop + ': ');
+					self.currentResult.push(self.indentsForDepth(self.depth));
+					self.currentResult.push(prop + ': ');
 					var subtype = self.determineType(obj[prop]);
 					var subresult = self.formatType(subtype, obj[prop]);
 					if (subresult) {
-						buffer.push(subresult);
-						if (i != self.parentSizes[self.depth]-1) buffer.push(',');
-						buffer.push('\n');
+						if (i != self.parentSizes[self.depth]-1) self.currentResult.push(',');
+						self.currentResult.push('\n');
 					} else {
-						if (i != self.parentSizes[self.depth]-1) buffer.push(',');
-						buffer.push('\n');
+						if (i != self.parentSizes[self.depth]-1) self.currentResult.push(',');
+						self.currentResult.push('\n');
 					}
 					i++;
 				}
 				self.depth--;
 				self.parentSizes.pop();
-				buffer.push(self.indentsForDepth(self.depth));
-				buffer.push('}');
-				self.currentResult = buffer.join();
-				if (self.depth == 0) return self.currentResult;
+				self.currentResult.push(self.indentsForDepth(self.depth));
+				self.currentResult.push('}');
 				break;
 			case 'Array' :
-				var buffer = [];
-				buffer.push(self.currentResult);
-				buffer.push('[');
+				self.currentResult.push('[');
 				self.depth++;
 				self.parentSizes.push(obj.length);
 				for (var i = 0; i < obj.length; i++) {
 					var subtype = self.determineType(obj[i]);
-					if (subtype == 'Object' || subtype == 'Array') buffer.push('\n' + self.indentsForDepth(self.depth));
+					if (subtype == 'Object' || subtype == 'Array') self.currentResult.push('\n' + self.indentsForDepth(self.depth));
 					var subresult = self.formatType(subtype, obj[i]);
 					if (subresult) {
-						buffer.push(subresult);
-						if (i != self.parentSizes[self.depth]-1) buffer.push(', ');
-						if (subtype == 'Array') buffer.push(self.currentResult);
+						if (i != self.parentSizes[self.depth]-1) self.currentResult.push(', ');
 					} else {
-						if (i != self.parentSizes[self.depth]-1) buffer.push(', ');
-						if (subtype != 'Object') buffer.push(self.currentResult);
-						else if (i == self.parentSizes[self.depth]-1) buffer.push('\n');
+						if (i != self.parentSizes[self.depth]-1) self.currentResult.push(', ');
+						else if (i == self.parentSizes[self.depth]-1) self.currentResult.push('\n');
 					}
 				}
 				self.depth--;
 				self.parentSizes.pop();
-				buffer.push(']');
-				self.currentResult = buffer.join();
-				if (self.depth == 0) return self.currentResult;
+				self.currentResult.push(']');
 				break;
 			case 'function' :
-				obj += '';
-				var buffer = [];
-				buffer.push(self.currentResult);
-				var lines = obj.split('\n');
+				var lines = (String(obj)).split('\n');
 				for (var i = 0; i < lines.length; i++) {
 					if (lines[i].match(/\}/)) self.depth--;
-					buffer.push(self.indentsForDepth(self.depth));
+					self.currentResult.push(self.indentsForDepth(self.depth));
 					if (lines[i].match(/\{/)) self.depth++;
-					buffer.push(lines[i] + '\n');
+					self.currentResult.push(lines[i] + '\n');
 				}
-				self.currentResult = buffer.join();
-				return self.currentResult;
 				break;
 			case 'RegExp' :
-				return '/'+obj.source+'/';
+				self.currentResult.push('/'+obj.source+'/');
 				break;
 			case 'Date' :
 			case 'string' :
 				if (self.depth > 0 || obj.length == 0) {
-					return '"'+obj+'"';
+					self.currentResult.push('"'+obj+'"');
 				} else {
-					return obj;
+					self.currentResult.push(obj);
 				}
+				break;
 			case 'boolean' :
-				if (obj) return 'true';
-				else return 'false';
+				if (obj) self.currentResult.push('true');
+				else self.currentResult.push('false');
+				break;
 			case 'number' :
-				return obj+'';
+				self.currentResult.push(obj+'');
 				break;
 		}
+		return self.currentResult.join('');
 	}
 	this.indentsForDepth = function(depth) {
 		var str = '';
