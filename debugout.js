@@ -6,7 +6,7 @@
 */
 
 // save all the console.logs
-function debugout() {
+function debugout(enableHeaderFooter) {
 	var self = this;
 
 	// OPTIONS
@@ -25,6 +25,8 @@ function debugout() {
 	self.currentResult = '';
 	self.startTime = new Date();
 	self.output = '';
+	self.enableHeaderFooter = enableHeaderFooter;
+    
 
 	this.version = function() { return '0.5.0' }
 
@@ -48,8 +50,8 @@ function debugout() {
 			}
 		}
 		return self.output
-			+ '\n---- Log retrieved: '+retrievalTime+' ----\n'
-			+ self.formatSessionDuration(self.startTime, retrievalTime);
+			+ (self.enableHeaderFooter ? ('\n---- Log retrieved: '+retrievalTime+' ----\n'
+			+ self.formatSessionDuration(self.startTime, retrievalTime)) : "");
 	}
 	// accepts optional number or uses the default for number of lines
 	this.tail = function(numLines) {
@@ -317,5 +319,5 @@ function debugout() {
 			self.output += '\n\n';
 		}
 	} 
-	self.output += '---- Session started: '+self.startTime+' ----\n\n';
+	self.output += (self.enableHeaderFooter ? '---- Session started: '+self.startTime+' ----\n\n' : "");
 }
