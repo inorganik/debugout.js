@@ -1,0 +1,23 @@
+{
+  "name": "debugout.js",
+  "version": "0.5.0",
+  "description": "Generates a text file from your logs.",
+  "main": "debugout.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/inorganik/debugout.js.git"
+  },
+  "keywords": [
+    "logging",
+    "debug",
+    "log",
+    "txt"
+  ],
+  "author": "@inorganik",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/inorganik/debugout.js/issues"
+  },
+  "homepage": "http://inorganik.github.io/debugout.js/"
+}
