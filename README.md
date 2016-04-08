@@ -21,6 +21,7 @@ Some highlights of debugout:
 Simply include the debugout.js file in your project or install via a package manager:
 
 npm: `npm install debugout.js`
+
 bower: `bower install debugout.js`
 
 ### Usage
