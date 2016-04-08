@@ -1,0 +1,17 @@
+{
+  "name": "debugout.js",
+  "main": "debugout.js",
+  "version": "0.5.0",
+  "homepage": "http://inorganik.github.io/debugout.js/",
+  "authors": [
+    "Jamie Perkins <jamie.perkins@gmail.com>"
+  ],
+  "description": "A replacement for the console API that generates a text file from your logs.",
+  "keywords": [
+    "console",
+    "logging",
+    "persistent",
+    "logs"
+  ],
+  "license": "MIT"
+}

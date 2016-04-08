@@ -16,6 +16,13 @@ Some highlights of debugout:
 
 ##[Try the demo](http://inorganik.github.io/debugout.js/)
 
+### Installation
+
+Simply include the debugout.js file in your project or install via a package manager:
+
+npm: `npm install debugout.js`
+bower: `bower install debugout.js`
+
 ### Usage
 
 Create a new debugout object in the global namespace, at the top of your script, and replace all your console log methods with debugout's log method:
