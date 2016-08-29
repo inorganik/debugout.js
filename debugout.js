@@ -18,7 +18,7 @@ function debugout() {
 	self.maxLines = 2500; // if autoTrim is true, this many most recent lines are saved
 	self.tailNumLines = 100; // how many lines tail() will retrieve
 	self.logFilename = 'debugout.txt'; // filename of log downloaded with downloadLog()
-	self.maxDepth = null; // max recursion depth for logged objects
+	self.maxDepth = 25; // max recursion depth for logged objects
 
 	// vars
 	self.depth = 0;

@@ -69,7 +69,7 @@ self.tailNumLines = 100;
 // filename of log downloaded with downloadLog()
 self.logFilename = 'log.txt';
 // max recursion depth for logged objects
-self.maxDepth = 3
+self.maxDepth = 25;
 ```
 
 ### Outputting examples <a name="outputting"></a>
