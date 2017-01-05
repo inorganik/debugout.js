@@ -82,17 +82,16 @@ function debugout() {
 	}
 	// immediately downloads the log - for desktop browser use
 	this.downloadLog = function() {
-	    var file = "data:text/plain;charset=utf-8,";
 	    var logFile = self.getLog();
-	    var encoded = encodeURIComponent(logFile);
-	    file += encoded;
-	    var a = document.createElement('a');
-	    a.href = file;
-	    a.target   = '_blank';
-	    a.download = self.logFilename;
-	    document.body.appendChild(a);
-	    a.click();
-	    a.remove();
+            var blob = new Blob([logFile], { type: 'data:text/plain;charset=utf-8' });
+            var a = document.createElement('a');
+            a.href = window.URL.createObjectURL(blob);
+            a.target = '_blank';
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(a.href);
 	}
 	// clears the log
 	this.clear = function() {
