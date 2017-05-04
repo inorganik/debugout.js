@@ -14,7 +14,7 @@ Some highlights of debugout:
 - optionally store the output in `window.localStorage` and continuously add to the same log each session
 - optionally cap the log to X most recent lines to limit memory consumption
 
-##[Try the demo](http://inorganik.github.io/debugout.js/)
+## [Try the demo](http://inorganik.github.io/debugout.js/)
 
 ### Installation
 
