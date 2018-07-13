@@ -87,7 +87,7 @@ function debugout() {
             var a = document.createElement('a');
             a.href = window.URL.createObjectURL(blob);
             a.target = '_blank';
-            a.download = filename;
+            a.download = self.logFilename;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
