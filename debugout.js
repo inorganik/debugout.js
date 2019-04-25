@@ -6,7 +6,7 @@
 */
 
 // save all the console.logs
-function debugout() {
+export const debugout = function ()  {
 	var self = this;
 
 	// OPTIONS
