@@ -2,7 +2,7 @@
 
     debugout.js
     by @inorganik
-    
+
 */
 
 // save all the console.logs
@@ -23,7 +23,7 @@ function debugout() {
 	// vars
 	self.depth = 0;
 	self.parentSizes = [0];
-	self.currentResult = '';
+	self.currentResult = [];
 	self.startTime = new Date();
 	self.output = '';
 
@@ -31,7 +31,7 @@ function debugout() {
 
 	/*
 		USER METHODS
-	*/	
+	*/
 	this.getLog = function() {
 		var retrievalTime = new Date();
 		// if recording is off, so dev knows why they don't have any logs
@@ -138,7 +138,7 @@ function debugout() {
 		}
 		self.depth = 0;
 		self.parentSizes = [0];
-		self.currentResult = '';
+		self.currentResult = [];
 	}
 	/*
 		METHODS FOR CONSTRUCTING THE LOG
@@ -181,82 +181,77 @@ function debugout() {
 
 		switch(type) {
 			case 'Object' :
-				self.currentResult += '{\n';
+				self.currentResult.push('{\n');
 				self.depth++;
 				self.parentSizes.push(self.objectSize(obj));
 				var i = 0;
 				for (var prop in obj) {
-					self.currentResult += self.indentsForDepth(self.depth);
-					self.currentResult += prop + ': ';
+					self.currentResult.push(self.indentsForDepth(self.depth));
+					self.currentResult.push(prop + ': ');
 					var subtype = self.determineType(obj[prop]);
 					var subresult = self.formatType(subtype, obj[prop]);
 					if (subresult) {
-						self.currentResult += subresult;
-						if (i != self.parentSizes[self.depth]-1) self.currentResult += ',';
-						self.currentResult += '\n';
+						if (i != self.parentSizes[self.depth]-1) self.currentResult.push(',');
+						self.currentResult.push('\n');
 					} else {
-						if (i != self.parentSizes[self.depth]-1) self.currentResult += ',';
-						self.currentResult += '\n';
+						if (i != self.parentSizes[self.depth]-1) self.currentResult.push(',');
+						self.currentResult.push('\n');
 					}
 					i++;
 				}
 				self.depth--;
 				self.parentSizes.pop();
-				self.currentResult += self.indentsForDepth(self.depth);
-				self.currentResult += '}';
-				if (self.depth == 0) return self.currentResult;
+				self.currentResult.push(self.indentsForDepth(self.depth));
+				self.currentResult.push('}');
 				break;
 			case 'Array' :
-				self.currentResult += '[';
+				self.currentResult.push('[');
 				self.depth++;
 				self.parentSizes.push(obj.length);
 				for (var i = 0; i < obj.length; i++) {
 					var subtype = self.determineType(obj[i]);
-					if (subtype == 'Object' || subtype == 'Array') self.currentResult += '\n' + self.indentsForDepth(self.depth);
+					if (subtype == 'Object' || subtype == 'Array') self.currentResult.push('\n' + self.indentsForDepth(self.depth));
 					var subresult = self.formatType(subtype, obj[i]);
 					if (subresult) {
-						self.currentResult += subresult;
-						if (i != self.parentSizes[self.depth]-1) self.currentResult += ', ';
-						if (subtype == 'Array') self.currentResult += '\n';
+						if (i != self.parentSizes[self.depth]-1) self.currentResult.push(', ');
 					} else {
-						if (i != self.parentSizes[self.depth]-1) self.currentResult += ', ';
-						if (subtype != 'Object') self.currentResult += '\n';
-						else if (i == self.parentSizes[self.depth]-1) self.currentResult += '\n';
+						if (i != self.parentSizes[self.depth]-1) self.currentResult.push(', ');
+						else if (i == self.parentSizes[self.depth]-1) self.currentResult.push('\n');
 					}
 				}
 				self.depth--;
 				self.parentSizes.pop();
-				self.currentResult += ']';
-				if (self.depth == 0) return self.currentResult;
+				self.currentResult.push(']');
 				break;
 			case 'function' :
-				obj += '';
-				var lines = obj.split('\n');
+				var lines = (String(obj)).split('\n');
 				for (var i = 0; i < lines.length; i++) {
 					if (lines[i].match(/\}/)) self.depth--;
-					self.currentResult += self.indentsForDepth(self.depth);
+					self.currentResult.push(self.indentsForDepth(self.depth));
 					if (lines[i].match(/\{/)) self.depth++;
-					self.currentResult += lines[i] + '\n';
+					self.currentResult.push(lines[i] + '\n');
 				}
-				return self.currentResult;
 				break;
 			case 'RegExp' :
-				return '/'+obj.source+'/';
+				self.currentResult.push('/'+obj.source+'/');
 				break;
 			case 'Date' :
-			case 'string' : 
+			case 'string' :
 				if (self.depth > 0 || obj.length == 0) {
-					return '"'+obj+'"';
+					self.currentResult.push('"'+obj+'"');
 				} else {
-					return obj;
+					self.currentResult.push(obj);
 				}
+				break;
 			case 'boolean' :
-				if (obj) return 'true';
-				else return 'false';
+				if (obj) self.currentResult.push('true');
+				else self.currentResult.push('false');
+				break;
 			case 'number' :
-				return obj+'';
+				self.currentResult.push(obj+'');
 				break;
 		}
+		return self.currentResult.join('');
 	}
 	this.indentsForDepth = function(depth) {
 		var str = '';
@@ -293,7 +288,7 @@ function debugout() {
 		var year = timestamp.getFullYear();
 		var date = timestamp.getDate();
 		var month = ('0' + (timestamp.getMonth() +1)).slice(-2);
-		var hrs = Number(timestamp.getHours()); 
+		var hrs = Number(timestamp.getHours());
 		var mins = ('0' + timestamp.getMinutes()).slice(-2);
 		var secs = ('0' + timestamp.getSeconds()).slice(-2);
 		return '['+ year + '-' + month + '-' + date + ' ' + hrs + ':' + mins + ':'+secs + ']: ';
@@ -320,6 +315,6 @@ function debugout() {
 			self.output += self.formatSessionDuration(start, end);
 			self.output += '\n\n';
 		}
-	} 
+	}
 	self.output += '---- Session started: '+self.startTime+' ----\n\n';
 }
