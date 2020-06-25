@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "lib": ["es2017", "DOM"],
+    "module": "esnext",
+    "moduleResolution": "node",
+    "declaration": true,
+    "outDir": "dist",
+    "target": "es5",
+    "pretty": true,
+    "esModuleInterop": true
+  },
+  "compileOnSave": true,
+  "include": ["src"],
+  "exclude": [
+    "node_modules",
+    "**/*.spec.ts"
+  ]
+}
