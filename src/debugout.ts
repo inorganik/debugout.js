@@ -168,11 +168,12 @@ export class Debugout {
   }
 
   determineType(object: any): string {
-    if (object !== null) {
+    if (object === null) {
+      return 'null';
+    } else {
       let type = typeof object as string;
       if (type === 'object') {
-        const len = object.length;
-        if (len === undefined) {
+        if (object.length === undefined) {
           if (typeof object.getTime === 'function') {
             type = 'Date';
           }
@@ -188,7 +189,6 @@ export class Debugout {
       }
       return type;
     }
-    return 'null';
   }
 
   // recursively stringify object
