@@ -49,13 +49,13 @@ export class Debugout {
   lsKey: string;
   indent = '  ';
 
-  startTime = new Date();
+  startTime: Date;
   output = ''; // holds all logs
 
-  version = () => '1.0.0';
+  version = () => '0.9.0';
   indentsForDepth = (depth: number) => this.indent.repeat(depth);
 
-  constructor(options: DebugoutOptions) {
+  constructor(options?: DebugoutOptions) {
     // set options from defaults and passed options.
     const settings = {
       ...debugoutDefaults,
@@ -72,16 +72,17 @@ export class Debugout {
       const stored = this.load();
       if (stored) {
         this.output = stored.log;
-        const start = new Date(stored.startTime);
+        this.startTime = new Date(stored.startTime);
         const end = new Date(stored.lastLog);
         this.output += `\n---- Session end: ${stored.lastLog} ----\n`;
-        this.output += this.formatSessionDuration(start, end);
+        this.output += this.formatSessionDuration(this.startTime, end);
         this.output += '\n\n';
       }
     } else {
+      this.startTime = new Date();
       this.useLocalStorage = false;
+      this.output += `---- Session started: ${this.formatDate(this.startTime)} ----\n\n`;
     }
-    this.output += `---- Session started: ${this.startTime} ----\n\n`;
   }
 
   // USER METHODS
@@ -118,17 +119,19 @@ export class Debugout {
 
   // records a log
   log(...args: unknown[]): void {
-    if (this.realTimeLoggingOn) console.log(args);
+    if (this.realTimeLoggingOn) console.log(...args);
     // record log
     let result = '';
     if (this.recordLogs) {
       args.forEach(obj => {
+        console.log('obj', this.determineType(obj), obj);
         result += this.stringify(obj);
         if (this.useTimestamps) {
-          this.output += this.formatTimestamp();
+          this.output += this.formatDate();
         }
       });
     }
+    console.log('result', result);
     this.output += result + '\n';
     if (this.autoTrim) this.output = this.trimLog(this.output, this.maxLines);
     if (this.useLocalStorage) {
@@ -166,10 +169,10 @@ export class Debugout {
 
   determineType(object: any): string {
     if (object !== null) {
-      let type = String(typeof object);
+      let type = typeof object as string;
       if (type === 'object') {
         const len = object.length;
-        if (len === null) {
+        if (len === undefined) {
           if (typeof object.getTime === 'function') {
             type = 'Date';
           }
@@ -182,8 +185,6 @@ export class Debugout {
         } else {
           type = 'Array';
         }
-      } else {
-        type = type;
       }
       return type;
     }
@@ -230,16 +231,13 @@ export class Debugout {
   }
 
   stringifyFunction(fn: any, startingDepth = 0): string {
-    let result = fn + '';
     let depth = startingDepth;
-    const lines = fn.split('\n');
-    for (const line of lines) {
+    return String(fn).split('\n').map(line => {
       if (line.match(/\}/)) depth--;
-      result += this.indentsForDepth(depth);
+      const val = this.indentsForDepth(depth) + line.trim();
       if (line.match(/\{/)) depth++;
-      result += line + '\n';
-    }
-    return result;
+      return val;
+    }).join('\n');
   }
 
   // stringify any data
@@ -247,7 +245,8 @@ export class Debugout {
     if (depth >= this.maxDepth) {
       return '... (max-depth reached)';
     }
-    switch (this.determineType(obj)) {
+    const type = this.determineType(obj);
+    switch (type) {
       case 'Object':
         return this.stringifyObject(obj, depth);
       case 'Array':
@@ -266,7 +265,6 @@ export class Debugout {
     }
   }
 
-
   trimLog(log: string, maxLines: number): string {
     let lines = log.split('\n');
     if (lines.length > maxLines) {
@@ -274,11 +272,8 @@ export class Debugout {
     }
     return lines.join('\n');
   }
-  lines(): number {
-    return this.output.split('\n').length;
-  }
 
-  // calculate testing time
+  // no type args: typescript doesn't think dates can be subtracted but they can
   formatSessionDuration(startTime, endTime): string {
     let msec = endTime - startTime;
     const hh = Math.floor(msec / 1000 / 60 / 60);
@@ -294,7 +289,7 @@ export class Debugout {
   }
 
   // timestamp, formatted for brevity
-  formatTimestamp(ts = new Date()): string {
+  formatDate(ts = new Date()): string {
     const month = ('0' + (ts.getMonth() + 1)).slice(-2);
     const hrs = Number(ts.getHours());
     const mins = ('0' + ts.getMinutes()).slice(-2);

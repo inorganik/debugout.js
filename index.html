@@ -1,194 +1,213 @@
 <!DOCTYPE HTML>
 <html>
+
 <head>
 
-    <meta charset="UTF-8">
-    <meta name="robots" content="index,follow"> 
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta charset="UTF-8">
+  <meta name="robots" content="index,follow">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
-    <title>debugout.js</title>
+  <title>Debugout.js</title>
 
-    <link rel="stylesheet" type="text/css" href="../inorganik.github.io/assets/css/style.css?v=20140820">
+  <link rel="stylesheet" type="text/css" href="https://inorganik.github.io/assets/css/style.css?v=20191111">
 
-    <script type="text/javascript" src="debugout.js"></script>
-    <script type="text/javascript">
-    
-    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+  <script src="dist/debugout.js" type="module"></script>
+  <script>
+
+    (function (i, s, o, g, r, a, m) {
+      i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
+        (i[r].q = i[r].q || []).push(arguments)
+      }, i[r].l = 1 * new Date(); a = s.createElement(o),
+        m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
+    })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
 
     ga('create', 'UA-7742845-9', 'inorganik.github.io');
     ga('send', 'pageview');
 
-    </script>
+  </script>
 </head>
 
 <body>
-    <a class="forkMe" href="https://github.com/inorganik/debugout.js"><img src="../assets/img/forkme_custom_indigo.png" alt="Fork me on GitHub"></a>
-    <div id="wrap">
-        <header>
-            <div id="github"><a class="block" href="https://github.com/inorganik"></a></div>
-            <div class="leaderLine">////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////</div>
-            <div id="logo"><a class="block" href="http://inorganik.github.io"></a></div>
-        </header>
-        <section>
-            <h1>debugout.js &nbsp;<small id="version" class="lt-gray"></small></h1>
-            <p>debugout.js (debug output) generates a text file from your logs that can be searched, timestamped, downloaded and more. See examples and usage on GitHub.</p>
-            <p>Install via npm or bower using the package name <code class="indigo large">&nbsp;debugout.js&nbsp;</code> or</p>
-            <h3 class="marginTop marginBottom"><a class="lime weight700" href="https://github.com/inorganik/debugout.js">Download on GitHub</a></h3>
-        </section>
-        <section>
-            <div class="col-inner-no-lr">
-                <p class="large weight300 noMargin">Create a new debugout object and replace all your console logs with debugout's log method: </p>
-            </div>
-        </section>
-        <section>
-            <div class="col full marginTop">
-                <div class="code-contain marginBottom indigo">
-                    <code>var bugout = new debugout();<br>
-                        bugout.log('A date:');<br>
-                        bugout.log(d);<br>
-                        bugout.log('An array:');<br>
-                        bugout.log(arr);<br>
-                        bugout.log('A function:');<br>
-                        bugout.log(bugout.objectSize);<br>
-                        bugout.log('A regex');<br>
-                        bugout.log(rgx);<br>
-                        bugout.log('an object with nested objects...');<br>
-                        bugout.log(obj);<br>
-                        bugout.log('an array of objects...');<br>
-                        bugout.log(arrayWithObjects);<br>
-                    </code>
-                </div>
-            </div>
-        </section>
-        <section>
-            <form>
-                <h4 class="inlineLeft noMargin marginRight weight300">Get the log at run-time or any time with these methods:</h4>
-                <input type="button" class="inlineLeft marginRight" value="download log" onClick="demoDownloadLog()">
-                <input type="button" class="inlineLeft marginRight" value="get log" onClick="demoGetLog()" style="width:100px;">
-                <input type="button" class="inlineLeft marginRight" value="tail" onClick="demoTail()" style="width:100px;">
-            </form>
-        </section>
-        <section>
-            <form>
-                <h4 class="inlineLeft noMargin marginRight weight300">Also, search:</h4>
-                <input type="text" class="inlineLeft" value="" id="search" style="width:140px; margin-right:5px" placeholder="ex: subgenre">
-                <input type="button" class="inlineLeft marginRight" value="search" onClick="demoSearch()" style="width:100px;">
+  <a class="forkMe" href="https://github.com/inorganik/debugout.js"><img src="https://inorganik.github.io/assets/img/forkme_custom_indigo.png"
+      alt="Fork me on GitHub"></a>
+  <div id="wrap">
+    <header>
+      <div id="github"><a class="block" href="https://github.com/inorganik"></a></div>
+      <div class="leaderLine">
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      </div>
+      <div id="logo"><a class="block" href="http://inorganik.github.io"></a></div>
+    </header>
+    <section>
+      <h1>debugout.js &nbsp;<small id="version" class="lt-gray"></small></h1>
+      <p>debugout.js (debug output) generates a text file from your logs that can be searched, timestamped,
+        downloaded and more. See examples and usage on GitHub.</p>
+      <p>Install via npm or bower using the package name <code class="indigo large">&nbsp;debugout.js&nbsp;</code>
+        or</p>
+      <h3 class="marginTop marginBottom"><a class="lime weight700"
+          href="https://github.com/inorganik/debugout.js">Download on GitHub</a></h3>
+    </section>
+    <section>
+      <div class="col-inner-no-lr">
+        <p class="large weight300 noMargin">Create a new debugout object and replace all your console logs with
+          debugout's log method: </p>
+      </div>
+    </section>
+    <section>
+      <div class="col full marginTop">
+        <div class="code-contain marginBottom indigo">
+          <code>const bugout = new Debugout();<br>
+            bugout.log('A date:');<br>
+            bugout.log(d);<br>
+            bugout.log('An array:');<br>
+            bugout.log(arr);<br>
+            bugout.log('A function:');<br>
+            bugout.log(bugout.objectSize);<br>
+            bugout.log('A regex');<br>
+            bugout.log(rgx);<br>
+            bugout.log('an object with nested objects...');<br>
+            bugout.log(obj);<br>
+            bugout.log('an array of objects...');<br>
+            bugout.log(arrayWithObjects);<br>
+          </code>
+        </div>
+      </div>
+    </section>
+    <section>
+      <form>
+        <h4 class="inlineLeft noMargin marginRight weight300">Get the log at run-time or any time with these
+          methods:</h4>
+        <input type="button" class="inlineLeft marginRight" value="download log" id="downloadLog">
+        <input type="button" class="inlineLeft marginRight" value="get log" id="getLog"
+          style="width:100px;">
+        <input type="button" class="inlineLeft marginRight" value="tail" id="tail"
+          style="width:100px;">
+      </form>
+    </section>
+    <section>
+      <form>
+        <h4 class="inlineLeft noMargin marginRight weight300">Also, search:</h4>
+        <input type="text" class="inlineLeft" value="" id="search" style="width:140px; margin-right:5px"
+          placeholder="ex: subgenre">
+        <input type="button" class="inlineLeft marginRight" value="search" onClick="demoSearch()"
+          style="width:100px;">
 
-                <h4 class="inlineLeft noMargin marginRight weight300">And slice:</h4>
-                <input type="number" class="inlineLeft" value="" step="1" id="sliceStart" style="width:80px; margin-right:5px" placeholder="line">
-                <input type="number" class="inlineLeft marginRight" value="" step="1" id="sliceNumLines" style="width:80px" placeholder="# of lines">
-                <input type="button" class="inlineLeft" value="get slice" onClick="demoGetSlice()" style="width:100px;">
-            </form>
-        </section>
-        <section class="marginBottom">
-            <div class="col full marginBottom marginTop">
-                <h4 class="weight300">Console window:</h4>
-                <div class="code-contain marginBottom lime" style="min-height:500px">
-                    <code id="codeVisualizer">// Use a method above and output will be displayed here</code>
-                </div>
-            </div>
-        </section>
-    </div>
+        <h4 class="inlineLeft noMargin marginRight weight300">And slice:</h4>
+        <input type="number" class="inlineLeft" value="" step="1" id="sliceStart"
+          style="width:80px; margin-right:5px" placeholder="line">
+        <input type="number" class="inlineLeft marginRight" value="" step="1" id="sliceNumLines"
+          style="width:80px" placeholder="# of lines">
+        <input type="button" class="inlineLeft" value="get slice" onClick="demoGetSlice()" style="width:100px;">
+      </form>
+    </section>
+    <section class="marginBottom">
+      <div class="col full marginBottom marginTop">
+        <h4 class="weight300">Console window:</h4>
+        <div class="code-contain marginBottom lime" style="min-height:500px">
+          <code id="codeVisualizer">// Use a method above and output will be displayed here</code>
+        </div>
+      </div>
+    </section>
+  </div>
 
 </body>
-<script type="text/javascript">
+<script type="module">
 
-    // declare a debugout instance in the global namespace
-    // that means: not inside any functions
-    var bugout = new debugout;
+import { Debugout } from './dist/debugout.js'
+// declare a debugout instance, use in place of console
+const bugout = new Debugout({ realTimeLoggingOn: false });
 
-    // a test object
-    var obj = {
-        name: 'Jamie',
-        age: 34,
-        arr: ['another', 'test', 'array', 4, true, false],
-        emptyString: '',
-        nestedObj: {
-            apple: 'red',
-            orange: 'orange',
-            pear: 'green',
-            nestedNestedObj: {
-                red: 0,
-                yellow: 6,
-                green: 4
-            }
-        },
-        date: new Date(),
-        flag: true,
-        anotherFlag: false,
+// a test object
+const obj = {
+  name: 'Jamie',
+  age: 34,
+  arr: ['another', 'test', 'array', 4, true, false],
+  emptyString: '',
+  nestedObj: {
+    apple: 'red',
+    orange: 'orange',
+    pear: 'green',
+    nestedNestedObj: {
+      red: 0,
+      yellow: 6,
+      green: 4
     }
-    // a date
-    var d = new Date();
-    // an array
-    var arr = ['some', 'test', 'array'];
-    // a function
-    var testFunc = function() {
-        return 'oh heck ya debugout';
-    }
-    // a regex
-    var rgx = new RegExp(/debugout/);
-    // array with objects
-    var songOne = { genre: 'Drum \'n Bass', subgenre: 'liquid' }
-    var songTwo = { genre: 'Dubstep', subgenre: 'brostep', someArray: arr }
-    var songThree = { genre: 'R&B', subgenre: 'soul revival' }
-    var arrayWithObjects = [songOne, songTwo, songThree];
-    
-    window.onload = function() {
-        document.getElementById('version').innerHTML = 'v'+bugout.version();
-        // use debugout.log() instead of console.log()
-        bugout.log('A date:');
-        bugout.log(d);
-        bugout.log('An array:');
-        bugout.log(arr);
-        bugout.log('A function:');
-        bugout.log(bugout.objectSize);
-        bugout.log('A regex:');
-        bugout.log(rgx);
-        bugout.log('an object with nested objects and arrays...');
-        bugout.log(obj);
-        bugout.log('an array of objects...');
-        bugout.log(arrayWithObjects);
-    }
+  },
+  date: new Date(),
+  flag: true,
+  anotherFlag: false,
+}
+// a date
+const d = new Date();
+// an array
+const arr = ['some', 'test', 'array'];
+// a function
+const testFunc = function() {
+  return 'oh heck ya debugout';
+}
+// a regex
+const rgx = new RegExp(/debugout/);
+// array with objects
+const songOne = { genre: 'Drum \'n Bass', subgenre: 'liquid' }
+const songTwo = { genre: 'Dubstep', subgenre: 'brostep', someArray: arr }
+const songThree = { genre: 'R&B', subgenre: 'soul revival' }
+const arrayWithObjects = [songOne, songTwo, songThree];
 
-    function demoDownloadLog() {
-        var output = "bugout.downloadLog();";
-        bugout.downloadLog();
-        displayOutput(output);
-    }
-    function demoGetLog() {
-        var output = "bugout.getLog();\n";
-        output += bugout.getLog();
-        displayOutput(output);
-    }
-    function demoTail() {
-        var output = "bugout.tail(20);\n";
-        output += bugout.tail(20);
-        displayOutput(output);
-    }
-    function demoSearch() {
-        var term = document.getElementById('search').value;
-        var output = "bugout.search('"+term+"'');\n";
-        output += bugout.search(term);
-        displayOutput(output);
-    }
-    function demoGetSlice() {
-        var startLine = Number(document.getElementById('sliceStart').value);
-        var numLines = Number(document.getElementById('sliceNumLines').value);
-        var output = "bugout.getSlice("+startLine+", "+numLines+");\n\n";
-        output += bugout.getSlice(startLine, numLines);
-        displayOutput(output);
-    }
-    function displayOutput(output) {
-        // simulate console
-        console.log(output);
-        // format for html
-        output = output.replace(/\n/g, '<br>').replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
-        document.getElementById('codeVisualizer').innerHTML = output;
-    }
+function demoSearch() {
+  const term = document.getElementById('search').value;
+  const output = "bugout.search('" + term + "'');\n";
+  output += bugout.search(term);
+  displayOutput(output);
+}
+function demoGetSlice() {
+  const startLine = Number(document.getElementById('sliceStart').value);
+  const numLines = Number(document.getElementById('sliceNumLines').value);
+  const output = "bugout.getSlice(" + startLine + ", " + numLines + ");\n\n";
+  output += bugout.getSlice(startLine, numLines);
+  displayOutput(output);
+}
+function displayOutput(output) {
+  // simulate console
+  console.log(output);
+  // format for html
+  output = output.replace(/\n/g, '<br>').replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
+  document.getElementById('codeVisualizer').innerHTML = output;
+}
 
-    </script>
+window.onload = function() {
+  document.getElementById('version').innerHTML = 'v' + bugout.version();
+  // use debugout.log() instead of console.log()
+  bugout.log('A date:');
+  bugout.log(d);
+  bugout.log('An array:');
+  bugout.log(arr);
+  bugout.log('A function:');
+  bugout.log(testFunc);
+  bugout.log('A regex:');
+  bugout.log(rgx);
+  bugout.log('an object with nested objects and arrays...');
+  bugout.log(obj);
+  bugout.log('an array of objects...');
+  bugout.log(arrayWithObjects);
+
+  document.getElementById('getLog').onclick = function() {
+    let output = 'bugout.getLog();\n';
+    output += bugout.getLog();
+    displayOutput(output);
+  }
+  document.getElementById('downloadLog').onclick = function() {
+    let output = 'bugout.downloadLog();';
+    bugout.downloadLog();
+    displayOutput(output);
+  }
+  document.getElementById('tail').onclick = function() {
+    let output = 'bugout.tail(20);\n';
+    output += bugout.tail(20);
+    displayOutput(output);
+  }
+}
+
+</script>
+
 </html>
