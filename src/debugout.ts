@@ -132,7 +132,6 @@ export class Debugout {
   warn(...args: unknown[]): void {
     if (this.realTimeLoggingOn) console.warn(...args);
     if (this.recordLogs) this.recordLog('[WARN]', ...args);
-    this.recordLog('[WARN]', ...args);
   }
   error(...args: unknown[]): void {
     if (this.realTimeLoggingOn) console.error(...args);

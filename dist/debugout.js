@@ -127,7 +127,6 @@ var Debugout = /** @class */ (function () {
             console.warn.apply(console, args);
         if (this.recordLogs)
             this.recordLog.apply(this, __spreadArrays(['[WARN]'], args));
-        this.recordLog.apply(this, __spreadArrays(['[WARN]'], args));
     };
     Debugout.prototype.error = function () {
         var args = [];
@@ -163,7 +162,7 @@ var Debugout = /** @class */ (function () {
     Debugout.prototype.clear = function () {
         this.output = '';
         if (this.includeSessionMetadata) {
-            this.logMetadata('Log cleared: ' + this.formatDate());
+            this.logMetadata('Log cleared: ' + this.formatDate().trim());
         }
         if (this.useLocalStorage)
             this.save();
@@ -387,7 +386,7 @@ var Debugout = /** @class */ (function () {
         var mins = ('0' + ts.getMinutes()).slice(-2);
         var secs = ('0' + ts.getSeconds()).slice(-2);
         var msecs = ('0' + ts.getMilliseconds()).slice(-2);
-        return "[" + ts.getFullYear() + "-" + month + "-" + ts.getDate() + " " + hrs + ":" + mins + ":" + secs + ":" + msecs + "]: ";
+        return "[" + ts.getFullYear() + "-" + month + "-" + ts.getDate() + " " + hrs + ":" + mins + ":" + secs + ":" + msecs + "] ";
     };
     Debugout.prototype.objectSize = function (obj) {
         var size = 0;

@@ -57,6 +57,8 @@
       <div class="col full marginTop">
         <div class="code-contain marginBottom indigo">
           <code>const bugout = new Debugout();<br>
+            bugout.warn('a warning');<br>
+            bugout.error('an error');<br>
             bugout.log('A date:', d);<br>
             bugout.info('An array:', arr);<br>
             bugout.warn('A function:', testFunc);<br>
@@ -218,12 +220,15 @@
   let bugout;
 
   function logStuff() {
+    console.log('/////// log stuff');
     const options = establishOptionsFromInputs();
     bugout = new Debugout(options);
+    bugout.warn('a warning');
+    bugout.error('an error');
     bugout.log('A date:', d);
-    bugout.info('An array:', arr);
-    bugout.warn('A function:', testFunc);
-    bugout.error('A regex:', rgx);
+    bugout.log('An array:', arr);
+    bugout.log('A function:', testFunc);
+    bugout.log('A regex:', rgx);
     bugout.log('an object with nested objects and arrays...', obj);
     bugout.log('an array of objects...', arrayWithObjects);
     displayOutput(bugout.getLog());
