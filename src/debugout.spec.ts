@@ -184,7 +184,7 @@ describe('Debugout', () => {
     });
   });
 
-  fdescribe('# tail', () => {
+  describe('# tail', () => {
 
     it('gets the tail', () => {
       debugout = new Debugout({ includeSessionMetadata: false });
@@ -192,6 +192,30 @@ describe('Debugout', () => {
       debugout.log('a number', 26.2);
       debugout.log('a number', 98.6);
       expect(debugout.tail(2)).toEqual('"a number" 26.2\n"a number" 98.6\n');
+    });
+  });
+
+  describe('# search', () => {
+
+    it('finds all occurences of a search term', () => {
+      debugout = new Debugout({ includeSessionMetadata: false });
+      debugout.log('zebra, giraffe, gorilla');
+      debugout.log('jeep, moab, utah');
+      debugout.log('apple, orange, banana');
+      debugout.log('hells revenge, fins n things, moab');
+      expect(debugout.search('Moab')).toEqual('[0] "jeep, moab, utah"\n[1] "hells revenge, fins n things, moab"');
+    });
+  });
+
+  describe('# slice', () => {
+
+    it('gets a slice', () => {
+      debugout = new Debugout({ includeSessionMetadata: false });
+      debugout.log('zebra, giraffe, gorilla');
+      debugout.log('jeep, moab, utah');
+      debugout.log('apple, orange, banana');
+      debugout.log('hells revenge, fins n things, moab');
+      expect(debugout.slice(1, 3)).toEqual('"jeep, moab, utah"\n"apple, orange, banana"');
     });
   });
 

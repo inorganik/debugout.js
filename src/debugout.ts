@@ -176,15 +176,31 @@ export class Debugout {
   }
 
   search(term: string): string {
-    // todo
+    const rgx = new RegExp(term, 'ig');
+    const matched = this.output.split('\n').filter(line => line.match(rgx)).map((line, i) => {
+      return `[${i}] ${line}`;
+    });
+    let result = matched.join('\n');
+    if (!result.length) result = `Nothing found for "${term}".`;
+    return result;
   }
 
-  getSlice(lineNumber: number, numLines: number): string {
-    // todo
+  slice(...args: number[]): string {
+    return this.output.split('\n').slice(...args).join('\n');
   }
 
+  // downloads the log - for desktop browser use
   downloadLog(): void {
-    // todo
+    const logFile = this.getLog();
+    const blob = new Blob([logFile], { type: 'data:text/plain;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = window.URL.createObjectURL(blob);
+    a.target = '_blank';
+    a.download = this.logFilename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(a.href);
   }
 
   // METHODS FOR CONSTRUCTING THE LOG
