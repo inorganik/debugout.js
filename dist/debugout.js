@@ -28,7 +28,7 @@ var Debugout = /** @class */ (function () {
         this.indent = '  ';
         this.output = ''; // holds all logs
         this.version = function () { return '0.9.0'; };
-        this.indentsForDepth = function (depth) { return _this.indent.repeat(depth); };
+        this.indentsForDepth = function (depth) { return _this.indent.repeat(Math.max(depth, 0)); };
         // set options from defaults and passed options.
         var settings = __assign(__assign({}, debugoutDefaults), options);
         for (var prop in settings) {
@@ -137,11 +137,16 @@ var Debugout = /** @class */ (function () {
         window.localStorage.setItem(this.lsKey, JSON.stringify(saveObject));
     };
     Debugout.prototype.determineType = function (object) {
-        if (object !== null) {
+        if (object === null) {
+            return 'null';
+        }
+        else if (object === undefined) {
+            return 'undefined';
+        }
+        else {
             var type = typeof object;
             if (type === 'object') {
-                var len = object.length;
-                if (len === undefined) {
+                if (object.length === undefined) {
                     if (typeof object.getTime === 'function') {
                         type = 'Date';
                     }
@@ -158,26 +163,31 @@ var Debugout = /** @class */ (function () {
             }
             return type;
         }
-        return 'null';
     };
     // recursively stringify object
-    Debugout.prototype.stringifyObject = function (obj, depth) {
-        if (depth === void 0) { depth = 0; }
-        var result = '{\n';
-        var i = 0;
-        for (var prop in obj) {
-            result += this.indentsForDepth(depth);
-            result += prop + ': ';
-            var subresult = this.stringify(obj[prop], depth);
-            if (subresult) {
-                result += subresult;
-            }
-            if (i < this.objectSize(obj) - 1)
-                result += ',';
+    Debugout.prototype.stringifyObject = function (obj, startingDepth) {
+        if (startingDepth === void 0) { startingDepth = 0; }
+        var result = '{';
+        var depth = startingDepth;
+        if (this.objectSize(obj) > 0) {
             result += '\n';
-            i++;
+            depth++;
+            var i = 0;
+            for (var prop in obj) {
+                result += this.indentsForDepth(depth);
+                result += prop + ': ';
+                var subresult = this.stringify(obj[prop], depth);
+                if (subresult) {
+                    result += subresult;
+                }
+                if (i < this.objectSize(obj) - 1)
+                    result += ',';
+                result += '\n';
+                i++;
+            }
+            depth--;
+            result += this.indentsForDepth(depth);
         }
-        result += this.indentsForDepth(depth);
         result += '}';
         return result;
     };
@@ -234,11 +244,17 @@ var Debugout = /** @class */ (function () {
                 return '/' + obj.source + '/';
             case 'Date':
             case 'string':
-                return (depth > 0 || obj.length === 0) ? "\"" + obj + "\"" : obj;
+                return "\"" + obj + "\"";
             case 'boolean':
                 return (obj) ? 'true' : 'false';
             case 'number':
                 return obj + '';
+            case 'null':
+            case 'undefined':
+                return type;
+            default:
+                console.error('Unrecognized type:', type);
+                return '';
         }
     };
     Debugout.prototype.trimLog = function (log, maxLines) {

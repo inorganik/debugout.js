@@ -53,7 +53,7 @@ export class Debugout {
   output = ''; // holds all logs
 
   version = () => '0.9.0';
-  indentsForDepth = (depth: number) => this.indent.repeat(depth);
+  indentsForDepth = (depth: number) => this.indent.repeat(Math.max(depth, 0));
 
   constructor(options?: DebugoutOptions) {
     // set options from defaults and passed options.
@@ -170,6 +170,8 @@ export class Debugout {
   determineType(object: any): string {
     if (object === null) {
       return 'null';
+    } else if (object === undefined) {
+      return 'undefined';
     } else {
       let type = typeof object as string;
       if (type === 'object') {
@@ -192,21 +194,27 @@ export class Debugout {
   }
 
   // recursively stringify object
-  stringifyObject(obj: any, depth = 0): string {
-    let result = '{\n';
-    let i = 0;
-    for (const prop in obj) {
-      result += this.indentsForDepth(depth);
-      result += prop + ': ';
-      const subresult = this.stringify(obj[prop], depth);
-      if (subresult) {
-        result += subresult;
-      }
-      if (i < this.objectSize(obj) - 1) result += ',';
+  stringifyObject(obj: any, startingDepth = 0): string {
+    let result = '{';
+    let depth = startingDepth;
+    if (this.objectSize(obj) > 0) {
       result += '\n';
-      i++;
+      depth++;
+      let i = 0;
+      for (const prop in obj) {
+        result += this.indentsForDepth(depth);
+        result += prop + ': ';
+        const subresult = this.stringify(obj[prop], depth);
+        if (subresult) {
+          result += subresult;
+        }
+        if (i < this.objectSize(obj) - 1) result += ',';
+        result += '\n';
+        i++;
+      }
+      depth--;
+      result += this.indentsForDepth(depth);
     }
-    result += this.indentsForDepth(depth);
     result += '}';
     return result;
   }
@@ -257,11 +265,17 @@ export class Debugout {
         return '/' + obj.source + '/';
       case 'Date':
       case 'string':
-        return (depth > 0 || obj.length === 0) ? `"${obj}"` : obj;
+        return `"${obj}"`;
       case 'boolean':
         return (obj) ? 'true' : 'false';
       case 'number':
         return obj + '';
+      case 'null':
+      case 'undefined':
+        return type;
+      default:
+        console.error('Unrecognized type:', type);
+        return '';
     }
   }
 

@@ -32,7 +32,7 @@ export declare class Debugout {
     output: string;
     version: () => string;
     indentsForDepth: (depth: number) => string;
-    constructor(options: DebugoutOptions);
+    constructor(options?: DebugoutOptions);
     getLog(): string;
     clear(): void;
     log(...args: unknown[]): void;
@@ -40,7 +40,7 @@ export declare class Debugout {
     load(): DebugoutStorage;
     save(): void;
     determineType(object: any): string;
-    stringifyObject(obj: any, depth?: number): string;
+    stringifyObject(obj: any, startingDepth?: number): string;
     stringifyArray(arr: Array<any>, startingDepth?: number): string;
     stringifyFunction(fn: any, startingDepth?: number): string;
     stringify(obj: any, depth?: number): string;
