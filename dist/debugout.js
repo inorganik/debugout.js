@@ -9,10 +9,17 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
+var __spreadArrays = (this && this.__spreadArrays) || function () {
+    for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
+    for (var r = Array(s), k = 0, i = 0; i < il; i++)
+        for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
+            r[k] = a[j];
+    return r;
+};
 var debugoutDefaults = {
-    realTimeLoggingOn: false,
+    realTimeLoggingOn: true,
     useTimestamps: false,
-    includeSessionInfo: true,
+    includeSessionMetadata: true,
     useLocalStorage: false,
     recordLogs: true,
     autoTrim: true,
@@ -24,12 +31,18 @@ var debugoutDefaults = {
     indent: '  '
 };
 var Debugout = /** @class */ (function () {
+    /* tslint:enable:no-console */
     function Debugout(options) {
         var _this = this;
         this.indent = '  ';
         this.output = ''; // holds all logs
         this.version = function () { return '0.9.0'; };
         this.indentsForDepth = function (depth) { return _this.indent.repeat(Math.max(depth, 0)); };
+        // forwarded console methods not used by debugout
+        /* tslint:disable:no-console */
+        this.trace = function () { return console.trace(); };
+        this.time = function () { return console.time(); };
+        this.timeEnd = function () { return console.timeEnd(); };
         // set options from defaults and passed options.
         var settings = __assign(__assign({}, debugoutDefaults), options);
         for (var prop in settings) {
@@ -44,21 +57,90 @@ var Debugout = /** @class */ (function () {
                 this.output = stored.log;
                 this.startTime = new Date(stored.startTime);
                 var end = new Date(stored.lastLog);
-                if (this.includeSessionInfo) {
-                    this.output += "\n---- Session end: " + stored.lastLog + " ----\n";
-                    this.output += this.formatSessionDuration(this.startTime, end) + '\n\n';
-                }
+                this.logMetadata("Session end: " + stored.lastLog);
+                this.logMetadata(this.formatSessionDuration(this.startTime, end));
             }
         }
         else {
             this.startTime = new Date();
             this.useLocalStorage = false;
-            if (this.includeSessionInfo) {
-                this.output += "---- Session started: " + this.formatDate(this.startTime) + " ----\n\n";
-            }
+            this.logMetadata("Session started: " + this.formatDate(this.startTime));
         }
     }
+    // records a log
+    Debugout.prototype.recordLog = function () {
+        var _this = this;
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
+        // record log
+        this.output += args.map(function (obj) {
+            var result = _this.stringify(obj);
+            if (_this.useTimestamps) {
+                result += _this.formatDate();
+            }
+            return result;
+        }).join(' ');
+        this.output += '\n';
+        if (this.autoTrim)
+            this.output = this.trimLog(this.maxLines);
+        if (this.useLocalStorage) {
+            var saveObject = {
+                startTime: this.startTime,
+                log: this.output,
+                lastLog: new Date()
+            };
+            window.localStorage.setItem(this.lsKey, JSON.stringify(saveObject));
+        }
+    };
+    Debugout.prototype.logMetadata = function (msg) {
+        if (this.includeSessionMetadata)
+            this.output += "\n---- " + msg + " ----\n";
+    };
     // USER METHODS
+    Debugout.prototype.log = function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
+        if (this.realTimeLoggingOn)
+            console.log.apply(console, args);
+        if (this.recordLogs)
+            this.recordLog.apply(this, args);
+    };
+    Debugout.prototype.info = function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
+        // tslint:disable-next-line:no-console
+        if (this.realTimeLoggingOn)
+            console.info.apply(console, args);
+        if (this.recordLogs)
+            this.recordLog.apply(this, __spreadArrays(['[INFO]'], args));
+    };
+    Debugout.prototype.warn = function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
+        if (this.realTimeLoggingOn)
+            console.warn.apply(console, args);
+        if (this.recordLogs)
+            this.recordLog.apply(this, __spreadArrays(['[WARN]'], args));
+        this.recordLog.apply(this, __spreadArrays(['[WARN]'], args));
+    };
+    Debugout.prototype.error = function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
+        if (this.realTimeLoggingOn)
+            console.error.apply(console, args);
+        if (this.recordLogs)
+            this.recordLog.apply(this, __spreadArrays(['[ERROR]'], args));
+    };
     Debugout.prototype.getLog = function () {
         var retrievalTime = new Date();
         // if recording is off, so dev knows why they don't have any logs
@@ -74,63 +156,65 @@ var Debugout = /** @class */ (function () {
                 retrievalTime = new Date(stored.lastLog);
             }
         }
-        if (this.includeSessionInfo) {
-            this.output += "\n---- Log retrieved: " + retrievalTime + " ----\n";
-            this.output += this.formatSessionDuration(this.startTime, retrievalTime);
+        if (this.includeSessionMetadata) {
+            return this.output + this.formatSessionDuration(this.startTime, retrievalTime);
         }
         return this.output;
     };
     // clears the log
     Debugout.prototype.clear = function () {
-        var clearTime = new Date();
-        this.output = '---- Log cleared: ' + clearTime + ' ----\n';
-        if (this.useLocalStorage) {
-            this.save();
+        this.output = '';
+        if (this.includeSessionMetadata) {
+            this.logMetadata('Log cleared: ' + new Date());
         }
-        if (this.realTimeLoggingOn)
-            this.libNotice('clear()');
+        if (this.useLocalStorage)
+            this.save();
     };
-    // records a log
-    Debugout.prototype.log = function () {
-        var _this = this;
+    // gets last X number of lines
+    Debugout.prototype.tail = function (numLines) {
+        var lines = numLines || this.tailNumLines;
+        return this.trimLog(lines);
+    };
+    Debugout.prototype.search = function (term) {
+        var rgx = new RegExp(term, 'ig');
+        var lines = this.output.split('\n');
+        var matched = [];
+        // can't use a simple filter & map here because we need to add the line number
+        for (var i = 0; i < lines.length; i++) {
+            var addr = "[" + i + "] ";
+            if (lines[i].match(rgx)) {
+                matched.push(addr + lines[i].trim());
+            }
+        }
+        var result = matched.join('\n');
+        if (!result.length)
+            result = "Nothing found for \"" + term + "\".";
+        return result;
+    };
+    Debugout.prototype.slice = function () {
+        var _a;
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
             args[_i] = arguments[_i];
         }
-        if (this.realTimeLoggingOn)
-            console.log.apply(console, args);
-        // record log
-        if (this.recordLogs) {
-            this.output += args.map(function (obj) {
-                var result = _this.stringify(obj);
-                if (_this.useTimestamps) {
-                    result += _this.formatDate();
-                }
-                return result;
-            }).join(' ');
-        }
-        this.output += '\n';
-        if (this.autoTrim)
-            this.output = this.trimLog(this.output, this.maxLines);
-        if (this.useLocalStorage) {
-            var saveObject = {
-                startTime: this.startTime,
-                log: this.output,
-                lastLog: new Date()
-            };
-            window.localStorage.setItem(this.lsKey, JSON.stringify(saveObject));
-        }
+        return (_a = this.output.split('\n')).slice.apply(_a, args).join('\n');
+    };
+    // downloads the log - for desktop browser use
+    Debugout.prototype.downloadLog = function () {
+        var logFile = this.getLog();
+        var blob = new Blob([logFile], { type: 'data:text/plain;charset=utf-8' });
+        var a = document.createElement('a');
+        a.href = window.URL.createObjectURL(blob);
+        a.target = '_blank';
+        a.download = this.logFilename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(a.href);
     };
     // METHODS FOR CONSTRUCTING THE LOG
     Debugout.prototype.libNotice = function (msg) {
         this.log("[debugout.js] " + msg);
-    };
-    Debugout.prototype.load = function () {
-        var saved = window.localStorage.getItem(this.lsKey);
-        if (saved) {
-            return JSON.parse(saved);
-        }
-        return null;
     };
     Debugout.prototype.save = function () {
         var saveObject = {
@@ -139,6 +223,13 @@ var Debugout = /** @class */ (function () {
             lastLog: new Date()
         };
         window.localStorage.setItem(this.lsKey, JSON.stringify(saveObject));
+    };
+    Debugout.prototype.load = function () {
+        var saved = window.localStorage.getItem(this.lsKey);
+        if (saved) {
+            return JSON.parse(saved);
+        }
+        return null;
     };
     Debugout.prototype.determineType = function (object) {
         if (object === null) {
@@ -204,14 +295,19 @@ var Debugout = /** @class */ (function () {
             depth++;
             for (var i = 0; i < arr.length; i++) {
                 var subtype = this.determineType(arr[i]);
-                if (subtype === 'Object' || subtype === 'Array')
+                var needsNewLine = false;
+                if (subtype === 'Object' && this.objectSize(arr[i]) > 0)
+                    needsNewLine = true;
+                if (subtype === 'Array' && arr[i].length > 0)
+                    needsNewLine = true;
+                if (needsNewLine)
                     result += '\n' + this.indentsForDepth(depth);
                 var subresult = this.stringify(arr[i], depth);
                 if (subresult) {
                     result += subresult;
                     if (i < arr.length - 1)
                         result += ', ';
-                    if (subtype === 'Array' || subtype === 'Object')
+                    if (needsNewLine)
                         result += '\n';
                 }
             }
@@ -260,16 +356,16 @@ var Debugout = /** @class */ (function () {
             case 'undefined':
                 return type;
             default:
-                console.error('[debugout.js] Unrecognized type:', type);
                 return '';
         }
     };
-    Debugout.prototype.trimLog = function (log, maxLines) {
-        var lines = log.split('\n');
+    Debugout.prototype.trimLog = function (maxLines) {
+        var lines = this.output.split('\n');
+        lines.pop();
         if (lines.length > maxLines) {
             lines = lines.slice(lines.length - maxLines);
         }
-        return lines.join('\n');
+        return lines.join('\n') + '\n';
     };
     // no type args: typescript doesn't think dates can be subtracted but they can
     Debugout.prototype.formatSessionDuration = function (startTime, endTime) {
@@ -283,7 +379,7 @@ var Debugout = /** @class */ (function () {
         var ss = Math.floor(msec / 1000);
         var secs = ('0' + ss).slice(-2);
         msec -= ss * 1000;
-        return '---- Session duration: ' + hrs + ':' + mins + ':' + secs + ' ----';
+        return 'Session duration: ' + hrs + ':' + mins + ':' + secs;
     };
     // timestamp, formatted for brevity
     Debugout.prototype.formatDate = function (ts) {

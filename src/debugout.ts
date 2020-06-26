@@ -11,10 +11,11 @@ export interface DebugoutOptions {
   maxDepth?: number; // max recursion depth for logged objects
   lsKey?: string; // localStorage key
   indent?: string; // string to use for indent (2 spaces)
+  quoteStrings?: boolean;
 }
 
 const debugoutDefaults: DebugoutOptions = {
-  realTimeLoggingOn: false,
+  realTimeLoggingOn: true,
   useTimestamps: false,
   includeSessionMetadata: true,
   useLocalStorage: false,
@@ -25,7 +26,8 @@ const debugoutDefaults: DebugoutOptions = {
   logFilename: 'debugout.txt',
   maxDepth: 25,
   lsKey: 'debugout.js',
-  indent: '  '
+  indent: '  ',
+  quoteStrings: true
 };
 
 export interface DebugoutStorage {
@@ -51,6 +53,7 @@ export class Debugout {
   maxDepth: number;
   lsKey: string;
   indent = '  ';
+  quoteStrings: boolean;
 
   startTime: Date;
   output = ''; // holds all logs
@@ -156,7 +159,9 @@ export class Debugout {
         retrievalTime = new Date(stored.lastLog);
       }
     }
-    this.logMetadata(this.formatSessionDuration(this.startTime, retrievalTime));
+    if (this.includeSessionMetadata) {
+      return this.output + this.formatSessionDuration(this.startTime, retrievalTime);
+    }
     return this.output;
   }
 
@@ -177,9 +182,15 @@ export class Debugout {
 
   search(term: string): string {
     const rgx = new RegExp(term, 'ig');
-    const matched = this.output.split('\n').filter(line => line.match(rgx)).map((line, i) => {
-      return `[${i}] ${line}`;
-    });
+    const lines = this.output.split('\n');
+    const matched = [];
+    // can't use a simple filter & map here because we need to add the line number
+    for (let i = 0; i < lines.length; i++) {
+      const addr = `[${i}] `;
+      if (lines[i].match(rgx)) {
+        matched.push(addr + lines[i].trim());
+      }
+    }
     let result = matched.join('\n');
     if (!result.length) result = `Nothing found for "${term}".`;
     return result;
@@ -330,7 +341,7 @@ export class Debugout {
         return '/' + obj.source + '/';
       case 'Date':
       case 'string':
-        return `"${obj}"`;
+        return (this.quoteStrings) ? `"${obj}"` : obj + '';
       case 'boolean':
         return (obj) ? 'true' : 'false';
       case 'number':

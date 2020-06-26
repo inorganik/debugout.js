@@ -19,7 +19,7 @@ describe('Debugout', () => {
   describe('# determineType', () => {
 
     beforeEach(() => {
-      debugout = new Debugout();
+      debugout = new Debugout({ realTimeLoggingOn: false });
     });
 
     it('should properly type a string', () => {
@@ -57,7 +57,7 @@ describe('Debugout', () => {
   describe('# indentsForDepth', () => {
 
     beforeEach(() => {
-      debugout = new Debugout();
+      debugout = new Debugout({ realTimeLoggingOn: false });
     });
 
     it('should work', () => {
@@ -70,7 +70,7 @@ describe('Debugout', () => {
   describe('# stringify', () => {
 
     beforeEach(() => {
-      debugout = new Debugout();
+      debugout = new Debugout({ realTimeLoggingOn: false });
     });
 
     it('should properly stringify a string', () => {
@@ -136,14 +136,14 @@ describe('Debugout', () => {
   describe('# log', () => {
 
     it('caches logs in memory', () => {
-      debugout = new Debugout({ includeSessionMetadata: false });
+      debugout = new Debugout({ includeSessionMetadata: false, realTimeLoggingOn: false });
       debugout.log('a test');
       const result = debugout.getLog();
       expect(result).toEqual('"a test"\n');
     });
 
     it('can handle multiple args', () => {
-      debugout = new Debugout({ includeSessionMetadata: false });
+      debugout = new Debugout({ includeSessionMetadata: false, realTimeLoggingOn: false });
       debugout.log('a string', subjects.string);
       debugout.log('2 numbers', 26.2, 98.6);
       const results = debugout.getLog().split('\n');
@@ -155,7 +155,7 @@ describe('Debugout', () => {
   describe('# getLog', () => {
 
     it('gets the log', () => {
-      debugout = new Debugout({ includeSessionMetadata: false });
+      debugout = new Debugout({ includeSessionMetadata: false, realTimeLoggingOn: false });
       debugout.log('a string', subjects.string);
       const result = debugout.getLog();
       expect(result.length).toBeGreaterThan(0);
@@ -165,7 +165,7 @@ describe('Debugout', () => {
   describe('# clear', () => {
 
     it('clears the log', () => {
-      debugout = new Debugout({ includeSessionMetadata: false });
+      debugout = new Debugout({ includeSessionMetadata: false, realTimeLoggingOn: false });
       debugout.log('a string', subjects.string);
       debugout.clear();
       const result = debugout.getLog();
@@ -176,7 +176,7 @@ describe('Debugout', () => {
   describe('# trimLog', () => {
 
     it('trims the log', () => {
-      debugout = new Debugout({ includeSessionMetadata: false, maxLines: 1 });
+      debugout = new Debugout({ includeSessionMetadata: false, maxLines: 1, realTimeLoggingOn: false });
       debugout.log('a string', subjects.string);
       debugout.log('a number', 26.2);
       debugout.log('a number', 98.6);
@@ -187,7 +187,7 @@ describe('Debugout', () => {
   describe('# tail', () => {
 
     it('gets the tail', () => {
-      debugout = new Debugout({ includeSessionMetadata: false });
+      debugout = new Debugout({ includeSessionMetadata: false, realTimeLoggingOn: false });
       debugout.log('a string', subjects.string);
       debugout.log('a number', 26.2);
       debugout.log('a number', 98.6);
@@ -198,19 +198,19 @@ describe('Debugout', () => {
   describe('# search', () => {
 
     it('finds all occurences of a search term', () => {
-      debugout = new Debugout({ includeSessionMetadata: false });
+      debugout = new Debugout({ includeSessionMetadata: false, realTimeLoggingOn: false });
       debugout.log('zebra, giraffe, gorilla');
       debugout.log('jeep, moab, utah');
       debugout.log('apple, orange, banana');
       debugout.log('hells revenge, fins n things, moab');
-      expect(debugout.search('Moab')).toEqual('[0] "jeep, moab, utah"\n[1] "hells revenge, fins n things, moab"');
+      expect(debugout.search('Moab')).toEqual('[1] "jeep, moab, utah"\n[3] "hells revenge, fins n things, moab"');
     });
   });
 
   describe('# slice', () => {
 
     it('gets a slice', () => {
-      debugout = new Debugout({ includeSessionMetadata: false });
+      debugout = new Debugout({ includeSessionMetadata: false, realTimeLoggingOn: false });
       debugout.log('zebra, giraffe, gorilla');
       debugout.log('jeep, moab, utah');
       debugout.log('apple, orange, banana');

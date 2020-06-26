@@ -1,7 +1,7 @@
 export interface DebugoutOptions {
     realTimeLoggingOn?: boolean;
     useTimestamps?: boolean;
-    includeSessionInfo?: boolean;
+    includeSessionMetadata?: boolean;
     useLocalStorage?: boolean;
     recordLogs?: boolean;
     autoTrim?: boolean;
@@ -19,7 +19,7 @@ export interface DebugoutStorage {
 }
 export declare class Debugout {
     realTimeLoggingOn: boolean;
-    includeSessionInfo: boolean;
+    includeSessionMetadata: boolean;
     useTimestamps: boolean;
     useLocalStorage: boolean;
     recordLogs: boolean;
@@ -34,20 +34,32 @@ export declare class Debugout {
     output: string;
     version: () => string;
     indentsForDepth: (depth: number) => string;
+    trace: () => void;
+    time: () => void;
+    timeEnd: () => void;
     constructor(options?: DebugoutOptions);
+    private recordLog;
+    private logMetadata;
+    log(...args: unknown[]): void;
+    info(...args: unknown[]): void;
+    warn(...args: unknown[]): void;
+    error(...args: unknown[]): void;
     getLog(): string;
     clear(): void;
-    log(...args: unknown[]): void;
-    libNotice(msg: string): void;
+    tail(numLines?: number): string;
+    search(term: string): string;
+    slice(...args: number[]): string;
+    downloadLog(): void;
+    private libNotice;
+    private save;
     load(): DebugoutStorage;
-    save(): void;
     determineType(object: any): string;
     stringifyObject(obj: any, startingDepth?: number): string;
     stringifyArray(arr: Array<any>, startingDepth?: number): string;
     stringifyFunction(fn: any, startingDepth?: number): string;
     stringify(obj: any, depth?: number): string;
-    trimLog(log: string, maxLines: number): string;
-    formatSessionDuration(startTime: any, endTime: any): string;
+    trimLog(maxLines: number): string;
+    private formatSessionDuration;
     formatDate(ts?: Date): string;
     objectSize(obj: any): number;
 }
