@@ -10,8 +10,9 @@ var __assign = (this && this.__assign) || function () {
     return __assign.apply(this, arguments);
 };
 var debugoutDefaults = {
-    realTimeLoggingOn: true,
+    realTimeLoggingOn: false,
     useTimestamps: false,
+    includeSessionInfo: true,
     useLocalStorage: false,
     recordLogs: true,
     autoTrim: true,
@@ -43,15 +44,18 @@ var Debugout = /** @class */ (function () {
                 this.output = stored.log;
                 this.startTime = new Date(stored.startTime);
                 var end = new Date(stored.lastLog);
-                this.output += "\n---- Session end: " + stored.lastLog + " ----\n";
-                this.output += this.formatSessionDuration(this.startTime, end);
-                this.output += '\n\n';
+                if (this.includeSessionInfo) {
+                    this.output += "\n---- Session end: " + stored.lastLog + " ----\n";
+                    this.output += this.formatSessionDuration(this.startTime, end) + '\n\n';
+                }
             }
         }
         else {
             this.startTime = new Date();
             this.useLocalStorage = false;
-            this.output += "---- Session started: " + this.formatDate(this.startTime) + " ----\n\n";
+            if (this.includeSessionInfo) {
+                this.output += "---- Session started: " + this.formatDate(this.startTime) + " ----\n\n";
+            }
         }
     }
     // USER METHODS
@@ -70,9 +74,11 @@ var Debugout = /** @class */ (function () {
                 retrievalTime = new Date(stored.lastLog);
             }
         }
-        return this.output +
-            ("\n---- Log retrieved: " + retrievalTime + " ----\n") +
-            this.formatSessionDuration(this.startTime, retrievalTime);
+        if (this.includeSessionInfo) {
+            this.output += "\n---- Log retrieved: " + retrievalTime + " ----\n";
+            this.output += this.formatSessionDuration(this.startTime, retrievalTime);
+        }
+        return this.output;
     };
     // clears the log
     Debugout.prototype.clear = function () {
@@ -94,18 +100,16 @@ var Debugout = /** @class */ (function () {
         if (this.realTimeLoggingOn)
             console.log.apply(console, args);
         // record log
-        var result = '';
         if (this.recordLogs) {
-            args.forEach(function (obj) {
-                console.log('obj', _this.determineType(obj), obj);
-                result += _this.stringify(obj);
+            this.output += args.map(function (obj) {
+                var result = _this.stringify(obj);
                 if (_this.useTimestamps) {
-                    _this.output += _this.formatDate();
+                    result += _this.formatDate();
                 }
-            });
+                return result;
+            }).join(' ');
         }
-        console.log('result', result);
-        this.output += result + '\n';
+        this.output += '\n';
         if (this.autoTrim)
             this.output = this.trimLog(this.output, this.maxLines);
         if (this.useLocalStorage) {
@@ -196,19 +200,22 @@ var Debugout = /** @class */ (function () {
         if (startingDepth === void 0) { startingDepth = 0; }
         var result = '[';
         var depth = startingDepth;
-        depth++;
-        for (var i = 0; i < arr.length; i++) {
-            var subtype = this.determineType(arr[i]);
-            if (subtype === 'Object' || subtype === 'Array')
-                result += '\n' + this.indentsForDepth(depth);
-            var subresult = this.stringify(arr[i], depth);
-            if (subresult) {
-                result += subresult;
-                if (i < arr.length - 1)
-                    result += ', ';
-                if (subtype === 'Array' || subtype === 'Object')
-                    result += '\n';
+        if (arr.length > 0) {
+            depth++;
+            for (var i = 0; i < arr.length; i++) {
+                var subtype = this.determineType(arr[i]);
+                if (subtype === 'Object' || subtype === 'Array')
+                    result += '\n' + this.indentsForDepth(depth);
+                var subresult = this.stringify(arr[i], depth);
+                if (subresult) {
+                    result += subresult;
+                    if (i < arr.length - 1)
+                        result += ', ';
+                    if (subtype === 'Array' || subtype === 'Object')
+                        result += '\n';
+                }
             }
+            depth--;
         }
         result += ']';
         return result;
@@ -253,7 +260,7 @@ var Debugout = /** @class */ (function () {
             case 'undefined':
                 return type;
             default:
-                console.error('Unrecognized type:', type);
+                console.error('[debugout.js] Unrecognized type:', type);
                 return '';
         }
     };

@@ -1,20 +1,22 @@
 export interface DebugoutOptions {
-  realTimeLoggingOn: boolean; // log in real time (forwards to console.log)
-  useTimestamps: boolean; // insert a timestamp in front of each log
-  useLocalStorage: boolean; // store the output using window.localStorage() and continuously add to the same log each session
-  recordLogs: boolean; // set to false after you're done debugging to avoid the log eating up memory
-  autoTrim: boolean; // to avoid the log eating up potentially endless memory
-  maxLines: number; // if autoTrim is true, this many most recent lines are saved
-  tailNumLines: number; // how many lines tail() will retrieve
-  logFilename: string; // filename of log downloaded with downloadLog()
-  maxDepth: number; // max recursion depth for logged objects
-  lsKey: string; // localStorage key
-  indent: string; // string to use for indent (2 spaces)
+  realTimeLoggingOn?: boolean; // log in real time (forwards to console.log)
+  useTimestamps?: boolean; // insert a timestamp in front of each log
+  includeSessionMetadata?: boolean; // includes session start, end, duration, and when log is cleared
+  useLocalStorage?: boolean; // store the output using window.localStorage() and continuously add to the same log each session
+  recordLogs?: boolean; // set to false after you're done debugging to avoid the log eating up memory
+  autoTrim?: boolean; // to avoid the log eating up potentially endless memory
+  maxLines?: number; // if autoTrim is true, this many most recent lines are saved
+  tailNumLines?: number; // how many lines tail() will retrieve
+  logFilename?: string; // filename of log downloaded with downloadLog()
+  maxDepth?: number; // max recursion depth for logged objects
+  lsKey?: string; // localStorage key
+  indent?: string; // string to use for indent (2 spaces)
 }
 
 const debugoutDefaults: DebugoutOptions = {
-  realTimeLoggingOn: true,
+  realTimeLoggingOn: false,
   useTimestamps: false,
+  includeSessionMetadata: true,
   useLocalStorage: false,
   recordLogs: true,
   autoTrim: true,
@@ -38,6 +40,7 @@ export class Debugout {
 
   // options
   realTimeLoggingOn: boolean;
+  includeSessionMetadata: boolean;
   useTimestamps: boolean;
   useLocalStorage: boolean;
   recordLogs: boolean;
@@ -54,6 +57,13 @@ export class Debugout {
 
   version = () => '0.9.0';
   indentsForDepth = (depth: number) => this.indent.repeat(Math.max(depth, 0));
+
+  // forwarded console methods not used by debugout
+  /* tslint:disable:no-console */
+  trace = () => console.trace();
+  time = () => console.time();
+  timeEnd = () => console.timeEnd();
+  /* tslint:enable:no-console */
 
   constructor(options?: DebugoutOptions) {
     // set options from defaults and passed options.
@@ -74,18 +84,62 @@ export class Debugout {
         this.output = stored.log;
         this.startTime = new Date(stored.startTime);
         const end = new Date(stored.lastLog);
-        this.output += `\n---- Session end: ${stored.lastLog} ----\n`;
-        this.output += this.formatSessionDuration(this.startTime, end);
-        this.output += '\n\n';
+        this.logMetadata(`Session end: ${stored.lastLog}`);
+        this.logMetadata(this.formatSessionDuration(this.startTime, end));
       }
     } else {
       this.startTime = new Date();
       this.useLocalStorage = false;
-      this.output += `---- Session started: ${this.formatDate(this.startTime)} ----\n\n`;
+      this.logMetadata(`Session started: ${this.formatDate(this.startTime)}`);
     }
   }
 
+  // records a log
+  private recordLog(...args: unknown[]): void {
+    // record log
+    this.output += args.map(obj => {
+      let result = this.stringify(obj);
+      if (this.useTimestamps) {
+        result += this.formatDate();
+      }
+      return result;
+    }).join(' ');
+    this.output += '\n';
+    if (this.autoTrim) this.output = this.trimLog(this.maxLines);
+    if (this.useLocalStorage) {
+      const saveObject = {
+        startTime: this.startTime,
+        log: this.output,
+        lastLog: new Date()
+      };
+      window.localStorage.setItem(this.lsKey, JSON.stringify(saveObject));
+    }
+  }
+
+  private logMetadata(msg: string): void {
+    if (this.includeSessionMetadata) this.output += `\n---- ${msg} ----\n`;
+  }
+
   // USER METHODS
+
+  log(...args: unknown[]): void {
+    if (this.realTimeLoggingOn) console.log(...args);
+    if (this.recordLogs) this.recordLog(...args);
+  }
+  info(...args: unknown[]): void {
+    // tslint:disable-next-line:no-console
+    if (this.realTimeLoggingOn) console.info(...args);
+    if (this.recordLogs) this.recordLog('[INFO]', ...args);
+  }
+  warn(...args: unknown[]): void {
+    if (this.realTimeLoggingOn) console.warn(...args);
+    if (this.recordLogs) this.recordLog('[WARN]', ...args);
+    this.recordLog('[WARN]', ...args);
+  }
+  error(...args: unknown[]): void {
+    if (this.realTimeLoggingOn) console.error(...args);
+    if (this.recordLogs) this.recordLog('[ERROR]', ...args);
+  }
 
   getLog(): string {
     let retrievalTime = new Date();
@@ -102,52 +156,50 @@ export class Debugout {
         retrievalTime = new Date(stored.lastLog);
       }
     }
-    return this.output +
-      `\n---- Log retrieved: ${retrievalTime} ----\n` +
-      this.formatSessionDuration(this.startTime, retrievalTime);
+    this.logMetadata(this.formatSessionDuration(this.startTime, retrievalTime));
+    return this.output;
   }
 
   // clears the log
   clear(): void {
-    const clearTime = new Date();
-    this.output = '---- Log cleared: ' + clearTime + ' ----\n';
-    if (this.useLocalStorage) {
-      this.save();
+    this.output = '';
+    if (this.includeSessionMetadata) {
+      this.logMetadata('Log cleared: ' + new Date());
     }
-    if (this.realTimeLoggingOn) this.libNotice('clear()');
+    if (this.useLocalStorage) this.save();
   }
 
-  // records a log
-  log(...args: unknown[]): void {
-    if (this.realTimeLoggingOn) console.log(...args);
-    // record log
-    let result = '';
-    if (this.recordLogs) {
-      args.forEach(obj => {
-        console.log('obj', this.determineType(obj), obj);
-        result += this.stringify(obj);
-        if (this.useTimestamps) {
-          this.output += this.formatDate();
-        }
-      });
-    }
-    console.log('result', result);
-    this.output += result + '\n';
-    if (this.autoTrim) this.output = this.trimLog(this.output, this.maxLines);
-    if (this.useLocalStorage) {
-      const saveObject = {
-        startTime: this.startTime,
-        log: this.output,
-        lastLog: new Date()
-      };
-      window.localStorage.setItem(this.lsKey, JSON.stringify(saveObject));
-    }
+  // gets last X number of lines
+  tail(numLines?: number): string {
+    const lines = numLines || this.tailNumLines;
+    return this.trimLog(lines);
+  }
+
+  search(term: string): string {
+    // todo
+  }
+
+  getSlice(lineNumber: number, numLines: number): string {
+    // todo
+  }
+
+  downloadLog(): void {
+    // todo
   }
 
   // METHODS FOR CONSTRUCTING THE LOG
 
-  libNotice(msg: string): void {
+  private libNotice(msg: string): void {
     this.log(`[debugout.js] ${msg}`);
+  }
+
+  private save(): void {
+    const saveObject = {
+      startTime: this.startTime,
+      log: this.output,
+      lastLog: new Date()
+    };
+    window.localStorage.setItem(this.lsKey, JSON.stringify(saveObject));
   }
 
   load(): DebugoutStorage {
@@ -156,15 +208,6 @@ export class Debugout {
       return JSON.parse(saved) as DebugoutStorage;
     }
     return null;
-  }
-
-  save(): void {
-    const saveObject = {
-      startTime: this.startTime,
-      log: this.output,
-      lastLog: new Date()
-    };
-    window.localStorage.setItem(this.lsKey, JSON.stringify(saveObject));
   }
 
   determineType(object: any): string {
@@ -223,16 +266,22 @@ export class Debugout {
   stringifyArray(arr: Array<any>, startingDepth = 0): string {
     let result = '[';
     let depth = startingDepth;
-    depth++;
-    for (let i = 0; i < arr.length; i++) {
-      const subtype = this.determineType(arr[i]);
-      if (subtype === 'Object' || subtype === 'Array') result += '\n' + this.indentsForDepth(depth);
-      const subresult = this.stringify(arr[i], depth);
-      if (subresult) {
-        result += subresult;
-        if (i < arr.length - 1) result += ', ';
-        if (subtype === 'Array' || subtype === 'Object') result += '\n';
+    if (arr.length > 0) {
+      depth++;
+      for (let i = 0; i < arr.length; i++) {
+        const subtype = this.determineType(arr[i]);
+        let needsNewLine = false;
+        if (subtype === 'Object' && this.objectSize(arr[i]) > 0) needsNewLine = true;
+        if (subtype === 'Array' && arr[i].length > 0) needsNewLine = true;
+        if (needsNewLine) result += '\n' + this.indentsForDepth(depth);
+        const subresult = this.stringify(arr[i], depth);
+        if (subresult) {
+          result += subresult;
+          if (i < arr.length - 1) result += ', ';
+          if (needsNewLine) result += '\n';
+        }
       }
+      depth--;
     }
     result += ']';
     return result;
@@ -274,21 +323,21 @@ export class Debugout {
       case 'undefined':
         return type;
       default:
-        console.error('Unrecognized type:', type);
         return '';
     }
   }
 
-  trimLog(log: string, maxLines: number): string {
-    let lines = log.split('\n');
+  trimLog(maxLines: number): string {
+    let lines = this.output.split('\n');
+    lines.pop();
     if (lines.length > maxLines) {
       lines = lines.slice(lines.length - maxLines);
     }
-    return lines.join('\n');
+    return lines.join('\n') + '\n';
   }
 
   // no type args: typescript doesn't think dates can be subtracted but they can
-  formatSessionDuration(startTime, endTime): string {
+  private formatSessionDuration(startTime, endTime): string {
     let msec = endTime - startTime;
     const hh = Math.floor(msec / 1000 / 60 / 60);
     const hrs = ('0' + hh).slice(-2);
@@ -299,7 +348,7 @@ export class Debugout {
     const ss = Math.floor(msec / 1000);
     const secs = ('0' + ss).slice(-2);
     msec -= ss * 1000;
-    return '---- Session duration: ' + hrs + ':' + mins + ':' + secs + ' ----';
+    return 'Session duration: ' + hrs + ':' + mins + ':' + secs;
   }
 
   // timestamp, formatted for brevity

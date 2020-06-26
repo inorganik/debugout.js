@@ -12,7 +12,8 @@ describe('Debugout', () => {
     object: { a: 'apple', b: 2, c: {}, d: [] },
     function: () => 'it works',
     regex: new RegExp(/debugout/),
-    null: null
+    null: null,
+    undef: undefined
   };
 
   describe('# determineType', () => {
@@ -47,6 +48,9 @@ describe('Debugout', () => {
     });
     it('should properly type null', () => {
       expect(debugout.determineType(subjects.null)).toEqual('null');
+    });
+    it('should properly type undefined', () => {
+      expect(debugout.determineType(subjects.undef)).toEqual('undefined');
     });
   });
 
@@ -83,7 +87,7 @@ describe('Debugout', () => {
       expect(result.substring(0, 16)).toEqual('"Fri Jun 26 2020');
     });
     it('should properly stringify an array', () => {
-      const expected = '[0, "string", \n  {}\n]';
+      const expected = '[0, "string", {}]';
       expect(debugout.stringify(subjects.array)).toEqual(expected);
     });
     it('should properly stringify an object', () => {
@@ -99,5 +103,96 @@ describe('Debugout', () => {
     it('should properly stringify null', () => {
       expect(debugout.stringify(subjects.null)).toEqual('null');
     });
+    it('should properly stringify undefined', () => {
+      expect(debugout.stringify(subjects.undef)).toEqual('undefined');
+    });
+    it('can handle objects nested in objects', () => {
+      const subj = { nested: subjects.object };
+      const nested = '{\n    a: "apple",\n    b: 2,\n    c: {},\n    d: []\n  }';
+      const expected = `{\n  nested: ${nested}\n}`;
+      expect(debugout.stringify(subj)).toEqual(expected);
+    });
+    it('can handle arrays nested in objects', () => {
+      const subj = { nested: subjects.array };
+      const nested = '[0, "string", {}]';
+      const expected = `{\n  nested: ${nested}\n}`;
+      expect(debugout.stringify(subj)).toEqual(expected);
+    });
+    it('can handle arrays nested in arrays', () => {
+      const subj = [subjects.array];
+      const nested = '[0, "string", {}]';
+      const expected = `[\n  ${nested}\n]`;
+      expect(debugout.stringify(subj)).toEqual(expected);
+    });
+    it('can handle objects nested in arrays', () => {
+      const subj = [subjects.object];
+      const nested = '{\n    a: "apple",\n    b: 2,\n    c: {},\n    d: []\n  }';
+      const expected = `[\n  ${nested}\n]`;
+      expect(debugout.stringify(subj)).toEqual(expected);
+    });
+
   });
+
+  describe('# log', () => {
+
+    it('caches logs in memory', () => {
+      debugout = new Debugout({ includeSessionMetadata: false });
+      debugout.log('a test');
+      const result = debugout.getLog();
+      expect(result).toEqual('"a test"\n');
+    });
+
+    it('can handle multiple args', () => {
+      debugout = new Debugout({ includeSessionMetadata: false });
+      debugout.log('a string', subjects.string);
+      debugout.log('2 numbers', 26.2, 98.6);
+      const results = debugout.getLog().split('\n');
+      expect(results[0]).toEqual('"a string" "A string"');
+      expect(results[1]).toEqual('"2 numbers" 26.2 98.6');
+    });
+  });
+
+  describe('# getLog', () => {
+
+    it('gets the log', () => {
+      debugout = new Debugout({ includeSessionMetadata: false });
+      debugout.log('a string', subjects.string);
+      const result = debugout.getLog();
+      expect(result.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('# clear', () => {
+
+    it('clears the log', () => {
+      debugout = new Debugout({ includeSessionMetadata: false });
+      debugout.log('a string', subjects.string);
+      debugout.clear();
+      const result = debugout.getLog();
+      expect(result.length).toEqual(0);
+    });
+  });
+
+  describe('# trimLog', () => {
+
+    it('trims the log', () => {
+      debugout = new Debugout({ includeSessionMetadata: false, maxLines: 1 });
+      debugout.log('a string', subjects.string);
+      debugout.log('a number', 26.2);
+      debugout.log('a number', 98.6);
+      expect(debugout.getLog()).toEqual('"a number" 98.6\n');
+    });
+  });
+
+  fdescribe('# tail', () => {
+
+    it('gets the tail', () => {
+      debugout = new Debugout({ includeSessionMetadata: false });
+      debugout.log('a string', subjects.string);
+      debugout.log('a number', 26.2);
+      debugout.log('a number', 98.6);
+      expect(debugout.tail(2)).toEqual('"a number" 26.2\n"a number" 98.6\n');
+    });
+  });
+
 });

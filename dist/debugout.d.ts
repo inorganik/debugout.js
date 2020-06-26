@@ -1,15 +1,16 @@
 export interface DebugoutOptions {
-    realTimeLoggingOn: boolean;
-    useTimestamps: boolean;
-    useLocalStorage: boolean;
-    recordLogs: boolean;
-    autoTrim: boolean;
-    maxLines: number;
-    tailNumLines: number;
-    logFilename: string;
-    maxDepth: number;
-    lsKey: string;
-    indent: string;
+    realTimeLoggingOn?: boolean;
+    useTimestamps?: boolean;
+    includeSessionInfo?: boolean;
+    useLocalStorage?: boolean;
+    recordLogs?: boolean;
+    autoTrim?: boolean;
+    maxLines?: number;
+    tailNumLines?: number;
+    logFilename?: string;
+    maxDepth?: number;
+    lsKey?: string;
+    indent?: string;
 }
 export interface DebugoutStorage {
     startTime: string;
@@ -18,6 +19,7 @@ export interface DebugoutStorage {
 }
 export declare class Debugout {
     realTimeLoggingOn: boolean;
+    includeSessionInfo: boolean;
     useTimestamps: boolean;
     useLocalStorage: boolean;
     recordLogs: boolean;
