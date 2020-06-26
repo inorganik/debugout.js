@@ -6,7 +6,6 @@ export interface DebugoutOptions {
   recordLogs?: boolean; // set to false after you're done debugging to avoid the log eating up memory
   autoTrim?: boolean; // to avoid the log eating up potentially endless memory
   maxLines?: number; // if autoTrim is true, this many most recent lines are saved
-  tailNumLines?: number; // how many lines tail() will retrieve
   logFilename?: string; // filename of log downloaded with downloadLog()
   maxDepth?: number; // max recursion depth for logged objects
   lsKey?: string; // localStorage key
@@ -22,7 +21,6 @@ const debugoutDefaults: DebugoutOptions = {
   recordLogs: true,
   autoTrim: true,
   maxLines: 2500,
-  tailNumLines: 100,
   logFilename: 'debugout.txt',
   maxDepth: 25,
   lsKey: 'debugout.js',
@@ -48,13 +46,13 @@ export class Debugout {
   recordLogs: boolean;
   autoTrim: boolean;
   maxLines: number;
-  tailNumLines: number;
   logFilename: string;
   maxDepth: number;
   lsKey: string;
   indent = '  ';
   quoteStrings: boolean;
 
+  tailNumLines = 25;
   startTime: Date;
   output = ''; // holds all logs
 
@@ -100,13 +98,10 @@ export class Debugout {
   // records a log
   private recordLog(...args: unknown[]): void {
     // record log
-    this.output += args.map(obj => {
-      let result = this.stringify(obj);
-      if (this.useTimestamps) {
-        result += this.formatDate();
-      }
-      return result;
-    }).join(' ');
+    if (this.useTimestamps) {
+      this.output += this.formatDate();
+    }
+    this.output += args.map(obj => this.stringify(obj)).join(' ');
     this.output += '\n';
     if (this.autoTrim) this.output = this.trimLog(this.maxLines);
     if (this.useLocalStorage) {
@@ -120,7 +115,7 @@ export class Debugout {
   }
 
   private logMetadata(msg: string): void {
-    if (this.includeSessionMetadata) this.output += `\n---- ${msg} ----\n`;
+    if (this.includeSessionMetadata) this.output += `---- ${msg} ----\n`;
   }
 
   // USER METHODS
@@ -160,7 +155,7 @@ export class Debugout {
       }
     }
     if (this.includeSessionMetadata) {
-      return this.output + this.formatSessionDuration(this.startTime, retrievalTime);
+      return this.output + `---- ${this.formatSessionDuration(this.startTime, retrievalTime)} ----\n`;
     }
     return this.output;
   }
@@ -169,7 +164,7 @@ export class Debugout {
   clear(): void {
     this.output = '';
     if (this.includeSessionMetadata) {
-      this.logMetadata('Log cleared: ' + new Date());
+      this.logMetadata('Log cleared: ' + this.formatDate().trim());
     }
     if (this.useLocalStorage) this.save();
   }
@@ -384,8 +379,10 @@ export class Debugout {
     const hrs = Number(ts.getHours());
     const mins = ('0' + ts.getMinutes()).slice(-2);
     const secs = ('0' + ts.getSeconds()).slice(-2);
-    return `[${ts.getFullYear()}-${month}-${ts.getDate()} ${hrs}:${mins}:${secs}]: `;
+    const msecs = ('0' + ts.getMilliseconds()).slice(-2);
+    return `[${ts.getFullYear()}-${month}-${ts.getDate()} ${hrs}:${mins}:${secs}:${msecs}] `;
   }
+
   objectSize(obj: any): number {
     let size = 0;
     for (const key in obj) {

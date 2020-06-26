@@ -29,8 +29,8 @@
 </head>
 
 <body>
-  <a class="forkMe" href="https://github.com/inorganik/debugout.js"><img src="https://inorganik.github.io/assets/img/forkme_custom_indigo.png"
-      alt="Fork me on GitHub"></a>
+  <a class="forkMe" href="https://github.com/inorganik/debugout.js"><img
+      src="https://inorganik.github.io/assets/img/forkme_custom_indigo.png" alt="Fork me on GitHub"></a>
   <div id="wrap">
     <header>
       <div id="github"><a class="block" href="https://github.com/inorganik"></a></div>
@@ -49,7 +49,8 @@
     </section>
     <section>
       <div class="col-inner-no-lr">
-        <p class="large weight300 noMargin">Create a new debugout object and replace "console" with your instance of Debugout: </p>
+        <p class="large weight300 noMargin">Create a new debugout object and replace "console" with your instance of
+          Debugout: </p>
       </div>
     </section>
     <section>
@@ -71,10 +72,8 @@
         <h4 class="inlineLeft noMargin marginRight weight300">Get the log at run-time or any time with these
           methods:</h4>
         <input type="button" class="inlineLeft marginRight" value="download log" id="downloadLog">
-        <input type="button" class="inlineLeft marginRight" value="get log" id="getLog"
-          style="width:100px;">
-        <input type="button" class="inlineLeft marginRight" value="tail" id="tail"
-          style="width:100px;">
+        <input type="button" class="inlineLeft marginRight" value="get log" id="getLog" style="width:100px;">
+        <input type="button" class="inlineLeft marginRight" value="tail" id="tail" style="width:100px;">
       </form>
     </section>
     <section>
@@ -82,15 +81,63 @@
         <h4 class="inlineLeft noMargin marginRight weight300">Also, search:</h4>
         <input type="text" class="inlineLeft" value="" id="search" style="width:140px; margin-right:5px"
           placeholder="ex: subgenre">
-        <input type="button" class="inlineLeft marginRight" value="search" id="doSearch"
-          style="width:100px;">
+        <input type="button" class="inlineLeft marginRight" value="search" id="doSearch" style="width:100px;">
 
         <h4 class="inlineLeft noMargin marginRight weight300">And slice:</h4>
-        <input type="number" class="inlineLeft" value="" step="1" id="sliceStart"
-          style="width:80px; margin-right:5px" placeholder="line">
-        <input type="number" class="inlineLeft marginRight" value="" step="1" id="sliceEnd"
-          style="width:80px" placeholder="# of lines">
-        <input type="button" class="inlineLeft" value="get slice" id="doSlice" style="width:100px;">
+        <input type="number" class="inlineLeft" value="" step="1" id="sliceStart" style="width:80px; margin-right:5px"
+          placeholder="line">
+        <input type="number" class="inlineLeft marginRight" value="" step="1" id="sliceEnd" style="width:80px"
+          placeholder="# of lines">
+        <input type="button" class="inlineLeft marginRight" value="get slice" id="doSlice" style="width:100px">
+        <h4 class="inlineLeft noMargin marginRight weight300">Also:</h4>
+        <input type="button" class="inlineLeft" value="clear" id="doClear" style="width:100px;">
+      </form>
+    </section>
+    <section>
+      <form>
+        <h4 class="inlineLeft noMargin weight300">Options:</h4>
+        <div class="inlineLeft marginLeft marginRight">
+          <input id="realTimeLoggingOn" type="checkbox" checked><label class="inlineLabel">realTimeLoggingOn</label>
+        </div>
+        <div class="inlineLeft marginRight">
+          <input id="useTimestamps" type="checkbox"><label class="inlineLabel">useTimestamps</label>
+        </div>
+        <div class="inlineLeft marginRight">
+          <input id="includeSessionMetadata" type="checkbox" checked><label
+            class="inlineLabel">includeSessionMetadata</label>
+        </div>
+        <div class="inlineLeft marginRight">
+          <input id="useLocalStorage" type="checkbox"><label class="inlineLabel">useLocalStorage</label>
+        </div>
+        <div class="inlineLeft marginRight">
+          <input id="recordLogs" type="checkbox" checked><label class="inlineLabel">recordLogs</label>
+        </div>
+        <div class="inlineLeft marginRight">
+          <input id="autoTrim" type="checkbox" checked><label class="inlineLabel">autoTrim</label>
+        </div>
+        <div class="inlineLeft marginRight">
+          <input id="quoteStrings" type="checkbox" checked><label class="inlineLabel">quoteStrings</label>
+        </div>
+        <div class="inlineLeft marginRight">
+          <input type="text" value="debugout.txt" id="logFilename" style="width:100px; padding:0 5px;">
+          <label class="inlineLabel">logFilename</label>
+        </div>
+        <div class="inlineLeft marginRight">
+          <input type="text" value="2500" id="maxLines" style="width:50px; padding:0 5px;">
+          <label class="inlineLabel">maxLines</label>
+        </div>
+        <div class="inlineLeft marginRight">
+          <input type="text" value="25" id="maxDepth" style="width:40px; padding:0 5px;">
+          <label class="inlineLabel">maxDepth</label>
+        </div>
+        <div class="inlineLeft marginRight">
+          <input type="text" value="debugout.js" id="lsKey" style="width:100px; padding:0 5px;">
+          <label class="inlineLabel">lsKey</label>
+        </div>
+        <div class="inlineLeft marginRight">
+          <input type="text" value="  " id="indent" style="width:50px; padding:0 5px;">
+          <label class="inlineLabel">indent</label>
+        </div>
       </form>
     </section>
     <section class="marginBottom">
@@ -106,90 +153,133 @@
 </body>
 <script type="module">
 
-import { Debugout } from './dist/debugout.js'
-// declare a debugout instance, use in place of console
-const bugout = new Debugout();
+  import { Debugout } from './dist/debugout.js'
 
-// a test object
-const obj = {
-  name: 'Jamie',
-  arr: ['red', 'gold', 'green', 4, true, false],
-  emptyString: '',
-  nestedObj: {
-    apple: 'red',
-    orange: 'orange',
-    pear: 'green',
-    nestedNestedObj: {
-      red: 0,
-      yellow: 6,
-      green: 4
+  // a test object
+  const obj = {
+    name: 'Jamie',
+    arr: ['red', 'gold', 'green', 4, true, false],
+    emptyString: '',
+    nestedObj: {
+      apple: 'red',
+      orange: 'orange',
+      pear: 'green',
+      nestedNestedObj: {
+        red: 0,
+        yellow: 6,
+        green: 4
+      }
+    },
+    date: new Date(),
+    flag: true,
+    anotherFlag: false,
+  }
+  // a date
+  const d = new Date();
+  // an array
+  const arr = ['some', 'test', 'array'];
+  // a function
+  const testFunc = function () {
+    return 'oh heck ya debugout';
+  }
+  // a regex
+  const rgx = new RegExp(/debugout/);
+  // array with objects
+  const songOne = { genre: 'Drum \'n Bass', subgenre: 'liquid' }
+  const songTwo = { genre: 'Dubstep', subgenre: 'brostep', someArray: arr }
+  const songThree = { genre: 'R&B', subgenre: 'soul revival' }
+  const arrayWithObjects = [songOne, songTwo, songThree];
+
+  const input = (id) => document.getElementById(id);
+
+  function displayOutput(output) {
+    // format for html
+    output = output.replace(/\n/g, '<br>').replace(/  /g, '&nbsp;&nbsp;');
+    document.getElementById('codeVisualizer').innerHTML = output;
+  }
+
+  function establishOptionsFromInputs() {
+    return {
+      realTimeLoggingOn: input('realTimeLoggingOn').checked,
+      useTimestamps: input('useTimestamps').checked,
+      includeSessionMetadata: input('includeSessionMetadata').checked,
+      useLocalStorage: input('useLocalStorage').checked,
+      recordLogs: input('recordLogs').checked,
+      autoTrim: input('autoTrim').checked,
+      quoteStrings: input('quoteStrings').checked,
+      logFilename: input('logFilename').value,
+      maxLines: Number(input('maxLines').value),
+      maxDepth: Number(input('maxDepth').value),
+      lsKey: input('lsKey').value,
+      indent: input('indent').value,
+    };
+  }
+
+  let bugout;
+
+  function logStuff() {
+    const options = establishOptionsFromInputs();
+    bugout = new Debugout(options);
+    bugout.log('A date:', d);
+    bugout.info('An array:', arr);
+    bugout.warn('A function:', testFunc);
+    bugout.error('A regex:', rgx);
+    bugout.log('an object with nested objects and arrays...', obj);
+    bugout.log('an array of objects...', arrayWithObjects);
+    displayOutput(bugout.getLog());
+  }
+
+  window.onload = function () {
+    logStuff();
+
+    document.getElementById('version').innerHTML = 'v' + bugout.version();
+    
+    input('realTimeLoggingOn').onchange = logStuff;
+    input('useTimestamps').onchange = logStuff;
+    input('includeSessionMetadata').onchange = logStuff;
+    input('useLocalStorage').onchange = logStuff;
+    input('recordLogs').onchange = logStuff;
+    input('autoTrim').onchange = logStuff;
+    input('quoteStrings').onchange = logStuff;
+    input('logFilename').onchange = logStuff;
+    input('maxLines').onchange = logStuff;
+    input('maxDepth').onchange = logStuff;
+    input('lsKey').onchange = logStuff;
+    input('indent').onchange = logStuff;
+
+    input('getLog').onclick = () => {
+      let output = 'bugout.getLog();\n';
+      output += bugout.getLog();
+      displayOutput(output);
     }
-  },
-  date: new Date(),
-  flag: true,
-  anotherFlag: false,
-}
-// a date
-const d = new Date();
-// an array
-const arr = ['some', 'test', 'array'];
-// a function
-const testFunc = function() {
-  return 'oh heck ya debugout';
-}
-// a regex
-const rgx = new RegExp(/debugout/);
-// array with objects
-const songOne = { genre: 'Drum \'n Bass', subgenre: 'liquid' }
-const songTwo = { genre: 'Dubstep', subgenre: 'brostep', someArray: arr }
-const songThree = { genre: 'R&B', subgenre: 'soul revival' }
-const arrayWithObjects = [songOne, songTwo, songThree];
-
-function displayOutput(output) {
-  // format for html
-  output = output.replace(/\n/g, '<br>').replace(/  /g, '&nbsp;&nbsp;');
-  document.getElementById('codeVisualizer').innerHTML = output;
-}
-
-window.onload = function() {
-  document.getElementById('version').innerHTML = 'v' + bugout.version();
-  // use debugout.log() instead of console.log()
-  bugout.log('A date:', d);
-  bugout.info('An array:', arr);
-  bugout.warn('A function:', testFunc);
-  bugout.error('A regex:', rgx);
-  bugout.log('an object with nested objects and arrays...', obj);
-  bugout.log('an array of objects...', arrayWithObjects);
-
-  document.getElementById('getLog').onclick = () => {
-    let output = 'bugout.getLog();\n';
-    output += bugout.getLog();
-    displayOutput(output);
+    input('downloadLog').onclick = () => {
+      let output = 'bugout.downloadLog();';
+      bugout.downloadLog();
+      displayOutput(output);
+    }
+    input('tail').onclick = () => {
+      let output = 'bugout.tail(20);\n';
+      output += bugout.tail(20);
+      displayOutput(output);
+    }
+    input('doSearch').onclick = () => {
+      const term = input('search').value;
+      let output = "bugout.search('" + term + "');\n";
+      output += bugout.search(term);
+      displayOutput(output);
+    }
+    input('doSlice').onclick = () => {
+      const startLine = Number(input('sliceStart').value);
+      const endLine = Number(input('sliceEnd').value);
+      let output = 'bugout.slice(' + startLine + ', ' + endLine + ');\n\n';
+      output += bugout.slice(startLine, endLine);
+      displayOutput(output);
+    }
+    input('doClear').onclick = () => {
+      bugout.clear();
+      displayOutput(bugout.getLog());
+    }
   }
-  document.getElementById('downloadLog').onclick = () => {
-    let output = 'bugout.downloadLog();';
-    bugout.downloadLog();
-    displayOutput(output);
-  }
-  document.getElementById('tail').onclick = () => {
-    let output = 'bugout.tail(20);\n';
-    output += bugout.tail(20);
-    displayOutput(output);
-  }
-  document.getElementById('doSearch').onclick = () => {
-    const term = document.getElementById('search').value;
-    let output = "bugout.search('" + term + "');\n";
-    output += bugout.search(term);
-    displayOutput(output);
-  }
-  document.getElementById('doSlice').onclick = () => {
-    const startLine = Number(document.getElementById('sliceStart').value);
-    const endLine = Number(document.getElementById('sliceEnd').value);
-    let output = 'bugout.slice(' + startLine + ', ' + endLine + ');\n\n';
-    output += bugout.slice(startLine, endLine);
-    displayOutput(output);
-  }
-}
 
 </script>
 

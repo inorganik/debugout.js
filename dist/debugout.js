@@ -24,17 +24,18 @@ var debugoutDefaults = {
     recordLogs: true,
     autoTrim: true,
     maxLines: 2500,
-    tailNumLines: 100,
     logFilename: 'debugout.txt',
     maxDepth: 25,
     lsKey: 'debugout.js',
-    indent: '  '
+    indent: '  ',
+    quoteStrings: true
 };
 var Debugout = /** @class */ (function () {
     /* tslint:enable:no-console */
     function Debugout(options) {
         var _this = this;
         this.indent = '  ';
+        this.tailNumLines = 25;
         this.output = ''; // holds all logs
         this.version = function () { return '0.9.0'; };
         this.indentsForDepth = function (depth) { return _this.indent.repeat(Math.max(depth, 0)); };
@@ -75,13 +76,10 @@ var Debugout = /** @class */ (function () {
             args[_i] = arguments[_i];
         }
         // record log
-        this.output += args.map(function (obj) {
-            var result = _this.stringify(obj);
-            if (_this.useTimestamps) {
-                result += _this.formatDate();
-            }
-            return result;
-        }).join(' ');
+        if (this.useTimestamps) {
+            this.output += this.formatDate();
+        }
+        this.output += args.map(function (obj) { return _this.stringify(obj); }).join(' ');
         this.output += '\n';
         if (this.autoTrim)
             this.output = this.trimLog(this.maxLines);
@@ -96,7 +94,7 @@ var Debugout = /** @class */ (function () {
     };
     Debugout.prototype.logMetadata = function (msg) {
         if (this.includeSessionMetadata)
-            this.output += "\n---- " + msg + " ----\n";
+            this.output += "---- " + msg + " ----\n";
     };
     // USER METHODS
     Debugout.prototype.log = function () {
@@ -157,7 +155,7 @@ var Debugout = /** @class */ (function () {
             }
         }
         if (this.includeSessionMetadata) {
-            return this.output + this.formatSessionDuration(this.startTime, retrievalTime);
+            return this.output + ("---- " + this.formatSessionDuration(this.startTime, retrievalTime) + " ----\n");
         }
         return this.output;
     };
@@ -165,7 +163,7 @@ var Debugout = /** @class */ (function () {
     Debugout.prototype.clear = function () {
         this.output = '';
         if (this.includeSessionMetadata) {
-            this.logMetadata('Log cleared: ' + new Date());
+            this.logMetadata('Log cleared: ' + this.formatDate());
         }
         if (this.useLocalStorage)
             this.save();
@@ -347,7 +345,7 @@ var Debugout = /** @class */ (function () {
                 return '/' + obj.source + '/';
             case 'Date':
             case 'string':
-                return "\"" + obj + "\"";
+                return (this.quoteStrings) ? "\"" + obj + "\"" : obj + '';
             case 'boolean':
                 return (obj) ? 'true' : 'false';
             case 'number':
@@ -388,7 +386,8 @@ var Debugout = /** @class */ (function () {
         var hrs = Number(ts.getHours());
         var mins = ('0' + ts.getMinutes()).slice(-2);
         var secs = ('0' + ts.getSeconds()).slice(-2);
-        return "[" + ts.getFullYear() + "-" + month + "-" + ts.getDate() + " " + hrs + ":" + mins + ":" + secs + "]: ";
+        var msecs = ('0' + ts.getMilliseconds()).slice(-2);
+        return "[" + ts.getFullYear() + "-" + month + "-" + ts.getDate() + " " + hrs + ":" + mins + ":" + secs + ":" + msecs + "]: ";
     };
     Debugout.prototype.objectSize = function (obj) {
         var size = 0;

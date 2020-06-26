@@ -173,17 +173,6 @@ describe('Debugout', () => {
     });
   });
 
-  describe('# trimLog', () => {
-
-    it('trims the log', () => {
-      debugout = new Debugout({ includeSessionMetadata: false, maxLines: 1, realTimeLoggingOn: false });
-      debugout.log('a string', subjects.string);
-      debugout.log('a number', 26.2);
-      debugout.log('a number', 98.6);
-      expect(debugout.getLog()).toEqual('"a number" 98.6\n');
-    });
-  });
-
   describe('# tail', () => {
 
     it('gets the tail', () => {
@@ -210,12 +199,82 @@ describe('Debugout', () => {
   describe('# slice', () => {
 
     it('gets a slice', () => {
-      debugout = new Debugout({ includeSessionMetadata: false, realTimeLoggingOn: false });
       debugout.log('zebra, giraffe, gorilla');
       debugout.log('jeep, moab, utah');
       debugout.log('apple, orange, banana');
       debugout.log('hells revenge, fins n things, moab');
       expect(debugout.slice(1, 3)).toEqual('"jeep, moab, utah"\n"apple, orange, banana"');
+    });
+  });
+
+  describe('options', () => {
+
+    let consoleSpy;
+    beforeEach(() => {
+      debugout = new Debugout({ includeSessionMetadata: false });
+      consoleSpy = jest.spyOn(console, 'log');
+    });
+
+    it('should respect "realTimeLoggingOn"', () => {
+      debugout.realTimeLoggingOn = true;
+      debugout.log('zebra');
+      expect(consoleSpy).toHaveBeenCalled();
+      consoleSpy.mockReset();
+
+      debugout.realTimeLoggingOn = false;
+      debugout.log('zebra');
+      expect(consoleSpy).not.toHaveBeenCalled();
+      consoleSpy.mockReset();
+    });
+
+    it('should respect "useTimestamps"', () => {
+      debugout = new Debugout({ useTimestamps: true, includeSessionMetadata: false });
+      debugout.log('zebra');
+      expect(debugout.getLog().length).toBeGreaterThan(15);
+
+      debugout = new Debugout({ useTimestamps: false, includeSessionMetadata: false });
+      debugout.log('zebra');
+      expect(debugout.getLog()).toEqual('"zebra"\n');
+    });
+
+    it('should respect "includeSessionMetadata"', () => {
+      debugout = new Debugout({ includeSessionMetadata: true, realTimeLoggingOn: false });
+      debugout.log('zebra');
+      expect(debugout.getLog().match(/^---- Session/)).toBeTruthy();
+    });
+
+    it('should respect "recordLogs"', () => {
+      debugout.recordLogs = false;
+      debugout.log('zebra');
+      expect(debugout.getLog().length).toEqual(0);
+    });
+
+    it('should respect "maxLines"', () => {
+      debugout.maxLines = 1;
+      debugout.log('a string', subjects.string);
+      debugout.log('a number', 26.2);
+      debugout.log('a number', 98.6);
+      expect(debugout.getLog()).toEqual('"a number" 98.6\n');
+    });
+
+    it('should respect "maxDepth"', () => {
+      debugout.maxDepth = 1;
+      debugout.log({ nested: { nested: { nested: { nested: 'hi' }}}});
+      const expected = '{\n  nested: ... (max-depth reached)\n}\n';
+      expect(debugout.getLog()).toEqual(expected);
+    });
+
+    it('should respect "indent"', () => {
+      debugout.indent = '--';
+      debugout.log({ nested: { message: 'hi' }});
+      const expected = '{\n--nested: {\n----message: "hi"\n--}\n}\n';
+      expect(debugout.getLog()).toEqual(expected);
+    });
+
+    it('should respect "quoteStrings"', () => {
+      debugout.quoteStrings = false;
+      debugout.log('zebra');
+      expect(debugout.getLog()).toEqual('zebra\n');
     });
   });
 

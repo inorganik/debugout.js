@@ -6,11 +6,11 @@ export interface DebugoutOptions {
     recordLogs?: boolean;
     autoTrim?: boolean;
     maxLines?: number;
-    tailNumLines?: number;
     logFilename?: string;
     maxDepth?: number;
     lsKey?: string;
     indent?: string;
+    quoteStrings?: boolean;
 }
 export interface DebugoutStorage {
     startTime: string;
@@ -25,11 +25,12 @@ export declare class Debugout {
     recordLogs: boolean;
     autoTrim: boolean;
     maxLines: number;
-    tailNumLines: number;
     logFilename: string;
     maxDepth: number;
     lsKey: string;
     indent: string;
+    quoteStrings: boolean;
+    tailNumLines: number;
     startTime: Date;
     output: string;
     version: () => string;
