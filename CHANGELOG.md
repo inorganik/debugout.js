@@ -1,5 +1,13 @@
 # Changelog
 
+### v 1.0.0 (06/27/20)
+
+- Rewritten in typescript
+- Modularized
+- More options
+- Tests with jest
+- Improved logging (multiple args, better formatting)
+
 ### v 0.5.0 (9/02/14)
 
 - Added `search()` 

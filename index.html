@@ -12,7 +12,7 @@
 
   <link rel="stylesheet" type="text/css" href="https://inorganik.github.io/assets/css/style.css?v=20191111">
 
-  <script src="dist/debugout.js" type="module"></script>
+  <script src="dist/debugout.min.js" type="module"></script>
   <script>
 
     (function (i, s, o, g, r, a, m) {
@@ -60,9 +60,9 @@
             bugout.warn('a warning');<br>
             bugout.error('an error');<br>
             bugout.log('A date:', d);<br>
-            bugout.info('An array:', arr);<br>
-            bugout.warn('A function:', testFunc);<br>
-            bugout.error('A regex', rgx);<br>
+            bugout.log('An array:', arr);<br>
+            bugout.log('A function:', testFunc);<br>
+            bugout.log('A regex', rgx);<br>
             bugout.log('an object with nested objects and arrays...', obj);<br>
             bugout.log('an array of objects...', arrayWithObjects);<br>
           </code>
@@ -105,20 +105,19 @@
           <input id="useTimestamps" type="checkbox"><label class="inlineLabel">useTimestamps</label>
         </div>
         <div class="inlineLeft marginRight">
-          <input id="includeSessionMetadata" type="checkbox" checked><label
-            class="inlineLabel">includeSessionMetadata</label>
+          <input id="includeSessionMetadata" type="checkbox" checked> <label class="inlineLabel">includeSessionMetadata</label>
         </div>
         <div class="inlineLeft marginRight">
-          <input id="useLocalStorage" type="checkbox"><label class="inlineLabel">useLocalStorage</label>
+          <input id="useLocalStorage" type="checkbox" checked> <label class="inlineLabel">useLocalStorage</label>
         </div>
         <div class="inlineLeft marginRight">
-          <input id="recordLogs" type="checkbox" checked><label class="inlineLabel">recordLogs</label>
+          <input id="recordLogs" type="checkbox" checked> <label class="inlineLabel">recordLogs</label>
         </div>
         <div class="inlineLeft marginRight">
-          <input id="autoTrim" type="checkbox" checked><label class="inlineLabel">autoTrim</label>
+          <input id="autoTrim" type="checkbox" checked> <label class="inlineLabel">autoTrim</label>
         </div>
         <div class="inlineLeft marginRight">
-          <input id="quoteStrings" type="checkbox" checked><label class="inlineLabel">quoteStrings</label>
+          <input id="quoteStrings" type="checkbox" checked> <label class="inlineLabel">quoteStrings</label>
         </div>
         <div class="inlineLeft marginRight">
           <input type="text" value="debugout.txt" id="logFilename" style="width:100px; padding:0 5px;">
@@ -157,6 +156,10 @@
 
   import { Debugout } from './dist/debugout.js'
 
+  let bugout;
+
+  const el = (id) => document.getElementById(id);
+
   // a test object
   const obj = {
     name: 'Jamie',
@@ -185,42 +188,37 @@
     return 'oh heck ya debugout';
   }
   // a regex
-  const rgx = new RegExp(/debugout/);
+  const rgx = new RegExp(/debugout/, 'gi');
   // array with objects
   const songOne = { genre: 'Drum \'n Bass', subgenre: 'liquid' }
   const songTwo = { genre: 'Dubstep', subgenre: 'brostep', someArray: arr }
   const songThree = { genre: 'R&B', subgenre: 'soul revival' }
   const arrayWithObjects = [songOne, songTwo, songThree];
 
-  const input = (id) => document.getElementById(id);
-
   function displayOutput(output) {
     // format for html
     output = output.replace(/\n/g, '<br>').replace(/  /g, '&nbsp;&nbsp;');
-    document.getElementById('codeVisualizer').innerHTML = output;
+    el('codeVisualizer').innerHTML = output;
   }
 
   function establishOptionsFromInputs() {
     return {
-      realTimeLoggingOn: input('realTimeLoggingOn').checked,
-      useTimestamps: input('useTimestamps').checked,
-      includeSessionMetadata: input('includeSessionMetadata').checked,
-      useLocalStorage: input('useLocalStorage').checked,
-      recordLogs: input('recordLogs').checked,
-      autoTrim: input('autoTrim').checked,
-      quoteStrings: input('quoteStrings').checked,
-      logFilename: input('logFilename').value,
-      maxLines: Number(input('maxLines').value),
-      maxDepth: Number(input('maxDepth').value),
-      lsKey: input('lsKey').value,
-      indent: input('indent').value,
+      realTimeLoggingOn: el('realTimeLoggingOn').checked,
+      useTimestamps: el('useTimestamps').checked,
+      includeSessionMetadata: el('includeSessionMetadata').checked,
+      useLocalStorage: el('useLocalStorage').checked,
+      recordLogs: el('recordLogs').checked,
+      autoTrim: el('autoTrim').checked,
+      quoteStrings: el('quoteStrings').checked,
+      logFilename: el('logFilename').value,
+      maxLines: Number(el('maxLines').value),
+      maxDepth: Number(el('maxDepth').value),
+      lsKey: el('lsKey').value,
+      indent: el('indent').value,
     };
   }
 
-  let bugout;
-
   function logStuff() {
-    console.log('/////// log stuff');
     const options = establishOptionsFromInputs();
     bugout = new Debugout(options);
     bugout.warn('a warning');
@@ -239,48 +237,48 @@
 
     document.getElementById('version').innerHTML = 'v' + bugout.version();
     
-    input('realTimeLoggingOn').onchange = logStuff;
-    input('useTimestamps').onchange = logStuff;
-    input('includeSessionMetadata').onchange = logStuff;
-    input('useLocalStorage').onchange = logStuff;
-    input('recordLogs').onchange = logStuff;
-    input('autoTrim').onchange = logStuff;
-    input('quoteStrings').onchange = logStuff;
-    input('logFilename').onchange = logStuff;
-    input('maxLines').onchange = logStuff;
-    input('maxDepth').onchange = logStuff;
-    input('lsKey').onchange = logStuff;
-    input('indent').onchange = logStuff;
+    el('realTimeLoggingOn').onchange = logStuff;
+    el('useTimestamps').onchange = logStuff;
+    el('includeSessionMetadata').onchange = logStuff;
+    el('useLocalStorage').onchange = logStuff;
+    el('recordLogs').onchange = logStuff;
+    el('autoTrim').onchange = logStuff;
+    el('quoteStrings').onchange = logStuff;
+    el('logFilename').onchange = logStuff;
+    el('maxLines').onchange = logStuff;
+    el('maxDepth').onchange = logStuff;
+    el('lsKey').onchange = logStuff;
+    el('indent').onchange = logStuff;
 
-    input('getLog').onclick = () => {
+    el('getLog').onclick = () => {
       let output = 'bugout.getLog();\n';
       output += bugout.getLog();
       displayOutput(output);
     }
-    input('downloadLog').onclick = () => {
+    el('downloadLog').onclick = () => {
       let output = 'bugout.downloadLog();';
       bugout.downloadLog();
       displayOutput(output);
     }
-    input('tail').onclick = () => {
+    el('tail').onclick = () => {
       let output = 'bugout.tail(20);\n';
       output += bugout.tail(20);
       displayOutput(output);
     }
-    input('doSearch').onclick = () => {
-      const term = input('search').value;
+    el('doSearch').onclick = () => {
+      const term = el('search').value;
       let output = "bugout.search('" + term + "');\n";
       output += bugout.search(term);
       displayOutput(output);
     }
-    input('doSlice').onclick = () => {
-      const startLine = Number(input('sliceStart').value);
-      const endLine = Number(input('sliceEnd').value);
+    el('doSlice').onclick = () => {
+      const startLine = Number(el('sliceStart').value);
+      const endLine = Number(el('sliceEnd').value);
       let output = 'bugout.slice(' + startLine + ', ' + endLine + ');\n\n';
       output += bugout.slice(startLine, endLine);
       displayOutput(output);
     }
-    input('doClear').onclick = () => {
+    el('doClear').onclick = () => {
       bugout.clear();
       displayOutput(bugout.getLog());
     }
