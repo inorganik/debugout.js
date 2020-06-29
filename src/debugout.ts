@@ -1,15 +1,15 @@
 export interface DebugoutOptions {
   realTimeLoggingOn?: boolean; // log in real time (forwards to console.log)
   useTimestamps?: boolean; // insert a timestamp in front of each log
-  includeSessionMetadata?: boolean; // includes session start, end, duration, and when log is cleared
-  useLocalStorage?: boolean; // store the output using window.localStorage() and continuously add to the same log each session
-  recordLogs?: boolean; // set to false after you're done debugging to avoid the log eating up memory
+  includeSessionMetadata?: boolean; // whether to include session start, end, duration, and when log is cleared
+  useLocalStorage?: boolean; // store the output using localStorage and continuously add to the same log each session
+  recordLogs?: boolean; // disable the core functionality of this lib 
   autoTrim?: boolean; // to avoid the log eating up potentially endless memory
   maxLines?: number; // if autoTrim is true, this many most recent lines are saved
   tailNumLines?: number; // default number of lines tail gets
   logFilename?: string; // filename of log downloaded with downloadLog()
   maxDepth?: number; // max recursion depth for logged objects
-  lsKey?: string; // localStorage key
+  localStorageKey?: string; // localStorage key
   indent?: string; // string to use for indent (2 spaces)
   quoteStrings?: boolean; // whether or not to put quotes around strings
 }
@@ -25,7 +25,7 @@ const debugoutDefaults: DebugoutOptions = {
   tailNumLines: 25,
   maxDepth: 20,
   logFilename: 'debugout.txt',
-  lsKey: 'debugout.js',
+  localStorageKey: 'debugout.js',
   indent: '  ',
   quoteStrings: true
 };
@@ -50,7 +50,7 @@ export class Debugout {
   maxLines: number;
   logFilename: string;
   maxDepth: number;
-  lsKey: string;
+  localStorageKey: string;
   indent = '  ';
   quoteStrings: boolean;
 
@@ -119,7 +119,7 @@ export class Debugout {
         log: this.output,
         lastLog: new Date()
       };
-      window.localStorage.setItem(this.lsKey, JSON.stringify(saveObject));
+      window.localStorage.setItem(this.localStorageKey, JSON.stringify(saveObject));
     }
   }
 
@@ -151,13 +151,13 @@ export class Debugout {
   error(...args: unknown[]): void {
     if (this.realTimeLoggingOn) console.error(...args);
     if (this.recordLogs) {
-      this.output += '[ERROR ';
+      this.output += '[ERROR] ';
       this.recordLog(...args);
     }
   }
 
   getLog(): string {
-    let retrievalTime = new Date();
+    const retrievalTime = new Date();
     // if recording is off, so dev knows why they don't have any logs
     if (!this.recordLogs) {
       this.info('Log recording is off');
@@ -168,7 +168,6 @@ export class Debugout {
       if (stored) {
         this.startTime = new Date(stored.startTime);
         this.output = stored.log;
-        retrievalTime = new Date(stored.lastLog);
       }
     }
     if (this.includeSessionMetadata) {
@@ -177,12 +176,11 @@ export class Debugout {
     return this.output;
   }
 
-  // clears the log. if true is passed, 
-  clear(clearStored = false): void {
+  // clears the log
+  clear(): void {
     this.output = '';
-    if (this.includeSessionMetadata) {
-      this.logMetadata('Log cleared ' + this.formatDate());
-    }
+    this.logMetadata(`Session started: ${this.formatDate(this.startTime)}`);
+    this.logMetadata('Log cleared ' + this.formatDate());
     if (this.useLocalStorage) this.save();
   }
 
@@ -192,6 +190,7 @@ export class Debugout {
     return this.trimLog(lines);
   }
 
+  // find occurences of your search term in the log
   search(term: string): string {
     const rgx = new RegExp(term, 'ig');
     const lines = this.output.split('\n');
@@ -208,22 +207,28 @@ export class Debugout {
     return result;
   }
 
+  // retrieve a section of the log. Works the same as js slice
   slice(...args: number[]): string {
     return this.output.split('\n').slice(...args).join('\n');
   }
 
-  // downloads the log - for desktop browser use
+  // downloads the log - for browser use
   downloadLog(): void {
-    const logFile = this.getLog();
-    const blob = new Blob([logFile], { type: 'data:text/plain;charset=utf-8' });
-    const a = document.createElement('a');
-    a.href = window.URL.createObjectURL(blob);
-    a.target = '_blank';
-    a.download = this.logFilename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(a.href);
+    if (!!window) {
+      const logFile = this.getLog();
+      const blob = new Blob([logFile], { type: 'data:text/plain;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = window.URL.createObjectURL(blob);
+      a.target = '_blank';
+      a.download = this.logFilename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(a.href);
+    } else {
+      console.error('downloadLog only works in the browser');
+    }
+
   }
 
   // METHODS FOR CONSTRUCTING THE LOG
@@ -234,11 +239,11 @@ export class Debugout {
       log: this.output,
       lastLog: new Date()
     };
-    window.localStorage.setItem(this.lsKey, JSON.stringify(saveObject));
+    window.localStorage.setItem(this.localStorageKey, JSON.stringify(saveObject));
   }
 
   private load(): DebugoutStorage {
-    const saved = window.localStorage.getItem(this.lsKey);
+    const saved = window.localStorage.getItem(this.localStorageKey);
     if (saved) {
       return JSON.parse(saved) as DebugoutStorage;
     }
@@ -276,6 +281,7 @@ export class Debugout {
 
   // recursively stringify object
   stringifyObject(obj: any, startingDepth = 0): string {
+    // return JSON.stringify(obj, null, this.indent); // can't control depth/line-breaks/quotes
     let result = '{';
     let depth = startingDepth;
     if (this.objectSize(obj) > 0) {
@@ -302,8 +308,10 @@ export class Debugout {
 
   // recursively stringify array
   stringifyArray(arr: Array<any>, startingDepth = 0): string {
+    // return JSON.stringify(arr, null, this.indent); // can't control depth/line-breaks/quotes
     let result = '[';
     let depth = startingDepth;
+    let lastLineNeedsNewLine = false;
     if (arr.length > 0) {
       depth++;
       for (let i = 0; i < arr.length; i++) {
@@ -311,13 +319,15 @@ export class Debugout {
         let needsNewLine = false;
         if (subtype === 'Object' && this.objectSize(arr[i]) > 0) needsNewLine = true;
         if (subtype === 'Array' && arr[i].length > 0) needsNewLine = true;
-        if (needsNewLine) result += '\n' + this.indentsForDepth(depth);
+        if (!lastLineNeedsNewLine && needsNewLine) result += '\n';
         const subresult = this.stringify(arr[i], depth);
         if (subresult) {
+          if (needsNewLine) result += this.indentsForDepth(depth);
           result += subresult;
           if (i < arr.length - 1) result += ', ';
           if (needsNewLine) result += '\n';
         }
+        lastLineNeedsNewLine = needsNewLine;
       }
       depth--;
     }
@@ -325,6 +335,7 @@ export class Debugout {
     return result;
   }
 
+  // pretty-printing functions is a lib unto itself - this simply prints with indents
   stringifyFunction(fn: any, startingDepth = 0): string {
     let depth = startingDepth;
     return String(fn).split('\n').map(line => {
@@ -349,7 +360,7 @@ export class Debugout {
       case 'function':
         return this.stringifyFunction(obj, depth);
       case 'RegExp':
-        return '/' + obj.source + '/';
+        return '/' + obj.source + '/' + obj.flags;
       case 'Date':
       case 'string':
         return (this.quoteStrings) ? `"${obj}"` : obj + '';
@@ -391,7 +402,6 @@ export class Debugout {
     return 'Session duration: ' + hrs + ':' + mins + ':' + secs;
   }
 
-  // timestamp, formatted for brevity
   formatDate(ts = new Date()): string {
     return `[${ts.toISOString()}]`;
   }

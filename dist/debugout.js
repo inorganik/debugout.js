@@ -16,11 +16,11 @@ var debugoutDefaults = {
     useLocalStorage: false,
     recordLogs: true,
     autoTrim: true,
-    maxLines: 5000,
+    maxLines: 3000,
     tailNumLines: 25,
-    maxDepth: 25,
+    maxDepth: 20,
     logFilename: 'debugout.txt',
-    lsKey: 'debugout.js',
+    localStorageKey: 'debugout.js',
     indent: '  ',
     quoteStrings: true
 };
@@ -90,7 +90,7 @@ var Debugout = /** @class */ (function () {
                 log: this.output,
                 lastLog: new Date()
             };
-            window.localStorage.setItem(this.lsKey, JSON.stringify(saveObject));
+            window.localStorage.setItem(this.localStorageKey, JSON.stringify(saveObject));
         }
     };
     Debugout.prototype.logMetadata = function (msg) {
@@ -141,7 +141,7 @@ var Debugout = /** @class */ (function () {
         if (this.realTimeLoggingOn)
             console.error.apply(console, args);
         if (this.recordLogs) {
-            this.output += '[ERROR ';
+            this.output += '[ERROR] ';
             this.recordLog.apply(this, args);
         }
     };
@@ -157,7 +157,6 @@ var Debugout = /** @class */ (function () {
             if (stored) {
                 this.startTime = new Date(stored.startTime);
                 this.output = stored.log;
-                retrievalTime = new Date(stored.lastLog);
             }
         }
         if (this.includeSessionMetadata) {
@@ -165,13 +164,11 @@ var Debugout = /** @class */ (function () {
         }
         return this.output;
     };
-    // clears the log. if true is passed, 
-    Debugout.prototype.clear = function (clearStored) {
-        if (clearStored === void 0) { clearStored = false; }
+    // clears the log
+    Debugout.prototype.clear = function () {
         this.output = '';
-        if (this.includeSessionMetadata) {
-            this.logMetadata('Log cleared ' + this.formatDate());
-        }
+        this.logMetadata("Session started: " + this.formatDate(this.startTime));
+        this.logMetadata('Log cleared ' + this.formatDate());
         if (this.useLocalStorage)
             this.save();
     };
@@ -180,6 +177,7 @@ var Debugout = /** @class */ (function () {
         var lines = numLines || this.tailNumLines;
         return this.trimLog(lines);
     };
+    // find occurences of your search term in the log
     Debugout.prototype.search = function (term) {
         var rgx = new RegExp(term, 'ig');
         var lines = this.output.split('\n');
@@ -196,6 +194,7 @@ var Debugout = /** @class */ (function () {
             result = "Nothing found for \"" + term + "\".";
         return result;
     };
+    // retrieve a section of the log. Works the same as js slice
     Debugout.prototype.slice = function () {
         var _a;
         var args = [];
@@ -204,18 +203,23 @@ var Debugout = /** @class */ (function () {
         }
         return (_a = this.output.split('\n')).slice.apply(_a, args).join('\n');
     };
-    // downloads the log - for desktop browser use
+    // downloads the log - for browser use
     Debugout.prototype.downloadLog = function () {
-        var logFile = this.getLog();
-        var blob = new Blob([logFile], { type: 'data:text/plain;charset=utf-8' });
-        var a = document.createElement('a');
-        a.href = window.URL.createObjectURL(blob);
-        a.target = '_blank';
-        a.download = this.logFilename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(a.href);
+        if (!!window) {
+            var logFile = this.getLog();
+            var blob = new Blob([logFile], { type: 'data:text/plain;charset=utf-8' });
+            var a = document.createElement('a');
+            a.href = window.URL.createObjectURL(blob);
+            a.target = '_blank';
+            a.download = this.logFilename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(a.href);
+        }
+        else {
+            console.error('downloadLog only works in the browser');
+        }
     };
     // METHODS FOR CONSTRUCTING THE LOG
     Debugout.prototype.save = function () {
@@ -224,10 +228,10 @@ var Debugout = /** @class */ (function () {
             log: this.output,
             lastLog: new Date()
         };
-        window.localStorage.setItem(this.lsKey, JSON.stringify(saveObject));
+        window.localStorage.setItem(this.localStorageKey, JSON.stringify(saveObject));
     };
     Debugout.prototype.load = function () {
-        var saved = window.localStorage.getItem(this.lsKey);
+        var saved = window.localStorage.getItem(this.localStorageKey);
         if (saved) {
             return JSON.parse(saved);
         }
@@ -267,6 +271,7 @@ var Debugout = /** @class */ (function () {
     // recursively stringify object
     Debugout.prototype.stringifyObject = function (obj, startingDepth) {
         if (startingDepth === void 0) { startingDepth = 0; }
+        // return JSON.stringify(obj, null, this.indent); // can't control depth/line-breaks/quotes
         var result = '{';
         var depth = startingDepth;
         if (this.objectSize(obj) > 0) {
@@ -294,8 +299,10 @@ var Debugout = /** @class */ (function () {
     // recursively stringify array
     Debugout.prototype.stringifyArray = function (arr, startingDepth) {
         if (startingDepth === void 0) { startingDepth = 0; }
+        // return JSON.stringify(arr, null, this.indent); // can't control depth/line-breaks/quotes
         var result = '[';
         var depth = startingDepth;
+        var lastLineNeedsNewLine = false;
         if (arr.length > 0) {
             depth++;
             for (var i = 0; i < arr.length; i++) {
@@ -305,22 +312,26 @@ var Debugout = /** @class */ (function () {
                     needsNewLine = true;
                 if (subtype === 'Array' && arr[i].length > 0)
                     needsNewLine = true;
-                if (needsNewLine)
-                    result += '\n' + this.indentsForDepth(depth);
+                if (!lastLineNeedsNewLine && needsNewLine)
+                    result += '\n';
                 var subresult = this.stringify(arr[i], depth);
                 if (subresult) {
+                    if (needsNewLine)
+                        result += this.indentsForDepth(depth);
                     result += subresult;
                     if (i < arr.length - 1)
                         result += ', ';
                     if (needsNewLine)
                         result += '\n';
                 }
+                lastLineNeedsNewLine = needsNewLine;
             }
             depth--;
         }
         result += ']';
         return result;
     };
+    // pretty-printing functions is a lib unto itself - this simply prints with indents
     Debugout.prototype.stringifyFunction = function (fn, startingDepth) {
         var _this = this;
         if (startingDepth === void 0) { startingDepth = 0; }
@@ -349,7 +360,7 @@ var Debugout = /** @class */ (function () {
             case 'function':
                 return this.stringifyFunction(obj, depth);
             case 'RegExp':
-                return '/' + obj.source + '/';
+                return '/' + obj.source + '/' + obj.flags;
             case 'Date':
             case 'string':
                 return (this.quoteStrings) ? "\"" + obj + "\"" : obj + '';
@@ -361,7 +372,7 @@ var Debugout = /** @class */ (function () {
             case 'undefined':
                 return type;
             case 'Debugout':
-                return 'this'; // prevent endless loop
+                return '... (Debugout)'; // prevent endless loop
             default:
                 return '?';
         }
@@ -388,7 +399,6 @@ var Debugout = /** @class */ (function () {
         msec -= ss * 1000;
         return 'Session duration: ' + hrs + ':' + mins + ':' + secs;
     };
-    // timestamp, formatted for brevity
     Debugout.prototype.formatDate = function (ts) {
         if (ts === void 0) { ts = new Date(); }
         return "[" + ts.toISOString() + "]";

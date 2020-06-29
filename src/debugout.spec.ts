@@ -11,7 +11,7 @@ describe('Debugout', () => {
     array: [0, 'string', {}],
     object: { a: 'apple', b: 2, c: {}, d: [] },
     function: () => 'it works',
-    regex: new RegExp(/debugout/),
+    regex: new RegExp(/debugout/gi),
     null: null,
     undef: undefined
   };
@@ -86,19 +86,8 @@ describe('Debugout', () => {
       const result = debugout.stringify(subjects.date);
       expect(result.substring(0, 16)).toEqual('"Fri Jun 26 2020');
     });
-    it('should properly stringify an array', () => {
-      const expected = '[0, "string", {}]';
-      expect(debugout.stringify(subjects.array)).toEqual(expected);
-    });
-    it('should properly stringify an object', () => {
-      const expected = '{\n  a: "apple",\n  b: 2,\n  c: {},\n  d: []\n}';
-      expect(debugout.stringify(subjects.object)).toEqual(expected);
-    });
-    it('should properly stringify a function', () => {
-      expect(debugout.stringify(subjects.function)).toEqual('function () { return \'it works\'; }');
-    });
     it('should properly stringify a regex', () => {
-      expect(debugout.stringify(subjects.regex)).toEqual('/debugout/');
+      expect(debugout.stringify(subjects.regex)).toEqual('/debugout/gi');
     });
     it('should properly stringify null', () => {
       expect(debugout.stringify(subjects.null)).toEqual('null');
@@ -106,32 +95,77 @@ describe('Debugout', () => {
     it('should properly stringify undefined', () => {
       expect(debugout.stringify(subjects.undef)).toEqual('undefined');
     });
-    it('can handle objects nested in objects', () => {
-      const subj = { nested: subjects.object };
-      const nested = '{\n    a: "apple",\n    b: 2,\n    c: {},\n    d: []\n  }';
-      const expected = `{\n  nested: ${nested}\n}`;
-      expect(debugout.stringify(subj)).toEqual(expected);
-    });
-    it('can handle arrays nested in objects', () => {
-      const subj = { nested: subjects.array };
-      const nested = '[0, "string", {}]';
-      const expected = `{\n  nested: ${nested}\n}`;
-      expect(debugout.stringify(subj)).toEqual(expected);
-    });
-    it('can handle arrays nested in arrays', () => {
-      const subj = [subjects.array];
-      const nested = '[0, "string", {}]';
-      const expected = `[\n  ${nested}\n]`;
-      expect(debugout.stringify(subj)).toEqual(expected);
-    });
-    it('can handle objects nested in arrays', () => {
-      const subj = [subjects.object];
-      const nested = '{\n    a: "apple",\n    b: 2,\n    c: {},\n    d: []\n  }';
-      const expected = `[\n  ${nested}\n]`;
-      expect(debugout.stringify(subj)).toEqual(expected);
-    });
     it('should detect itself', () => {
       expect(debugout.stringify(debugout)).toEqual('... (Debugout)');
+    });
+
+    describe('Stringifying arrays', () => {
+      it('should properly stringify an array', () => {
+        const expected = '[0, "string", {}]';
+        expect(debugout.stringify(subjects.array)).toEqual(expected);
+      });
+      it('can handle arrays nested in arrays', () => {
+        const subj = [subjects.array];
+        const nested = '[0, "string", {}]';
+        const expected = `[\n  ${nested}\n]`;
+        expect(debugout.stringify(subj)).toEqual(expected);
+      });
+      it('can handle objects nested in arrays', () => {
+        const subj = [subjects.object];
+        const nested = '{\n    a: "apple",\n    b: 2,\n    c: {},\n    d: []\n  }';
+        const expected = `[\n  ${nested}\n]`;
+        expect(debugout.stringify(subj)).toEqual(expected);
+      });
+      it('properly stringifies an array of objects', () => {
+        const obj = { apple: 'red', banana: 'yellow' };
+        const expectedObj = '  {\n    apple: "red",\n    banana: "yellow"\n  }';
+        expect(debugout.stringify([obj, obj])).toEqual('[\n' + expectedObj + ', \n' + expectedObj + '\n]');
+      });
+    });
+
+    describe('Stringifying objects', () => {
+      it('should properly stringify an object', () => {
+        const expected = '{\n  a: "apple",\n  b: 2,\n  c: {},\n  d: []\n}';
+        expect(debugout.stringify(subjects.object)).toEqual(expected);
+      });
+      it('can handle objects nested in objects', () => {
+        const subj = { nested: subjects.object };
+        const nested = '{\n    a: "apple",\n    b: 2,\n    c: {},\n    d: []\n  }';
+        const expected = `{\n  nested: ${nested}\n}`;
+        expect(debugout.stringify(subj)).toEqual(expected);
+      });
+      it('can handle arrays nested in objects', () => {
+        const subj = { nested: subjects.array };
+        const nested = '[0, "string", {}]';
+        const expected = `{\n  nested: ${nested}\n}`;
+        expect(debugout.stringify(subj)).toEqual(expected);
+      });
+    });
+
+    describe('Stringifying functions', () => {
+      it('should properly stringify a 1-line function', () => {
+        expect(debugout.stringify(subjects.function)).toEqual('function () { return \'it works\'; }');
+      });
+      it('should properly stringify a multi-line function', () => {
+        /* tslist:disable */
+        function objectSize(obj) {
+          var size = 0;
+          for (var key in obj) {
+            if (obj.hasOwnProperty(key)) size++;
+          }
+          return size;
+        }
+        /* tslint:enable */
+        const expected = 'function objectSize(obj) {\n'
+          + '  var size = 0;\n'
+          + '  for (var key in obj) {\n'
+          + '    if (obj.hasOwnProperty(key))\n'
+          + '    size++;\n'
+          + '  }\n'
+          + '  return size;\n'
+          + '}';
+        expect(debugout.stringify(objectSize)).toEqual(expected);
+      });
     });
 
   });

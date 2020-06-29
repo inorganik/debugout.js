@@ -1,133 +1,107 @@
 debugout.js
 ===========
 
-(debug output) generates a text file from your logs that can be searched, timestamped, downloaded and more. [See some examples below](#outputting).
+(debug output) generates a text file from your logs that can be searched, timestamped, downloaded and more. 
 
-Debugout's `log()` accepts any type of object including functions. Debugout is not a monkey patch, but a separate logging class altogether that you use instead of `console`.
+Debugout's `log()` method accepts 1 or more args of any type, including functions. Debugout is not a monkey patch, but a separate logging class altogether that you use in place of `console`.
 
 Some highlights of debugout:
 
-- get the entire log, or the tail at run-time or any time
+- get the entire log, or the tail at runtime or any time
+- download the log as a text file
 - search and slice the log
-- better understand usage patterns with optional timestamps
+- optionally timestamp logs
+- also supports info, warn and error methods
 - toggle live logging (console.log) in one place
 - optionally store the output in `window.localStorage` and continuously add to the same log each session
 - optionally cap the log to X most recent lines to limit memory consumption
+
+** New in 1.0 **
+
+- Improved logging (multiple args, better formatting)
+- Modularized
+- More options
+- Tested with jest
 
 ## [Try the demo](http://inorganik.github.io/debugout.js/)
 
 ### Installation
 
-Simply include the debugout.js file in your project or install via a package manager:
-
-npm: `npm install debugout.js`
-
-bower: `bower install debugout.js`
+npm: `npm i debugout.js`
 
 ### Usage
 
-Create a new debugout object in the global namespace, at the top of your script, and replace all your console log methods with debugout's log method:
+Use as a replacement for `console`, or just use it as a logging utility.
 
 ```js
-var bugout = new debugout();
+import { Debugout } from 'debugout.js';
 
-// instead of console.log('some object or string')
-bugout.log('some object or string');
+const bugout = new Debugout();
+
+// instead of console.log
+bugout.log('log stuff', someObject, someArray);
 ```
-Whatever you log is saved and added to the log file on a new line.
+Whatever you log is saved and added to the log file.
 
 ### Methods
 
-- `log()` - like `console.log()`, but saved!
+- `log()`, `warn()`, `info()`, `error()` - just like `console`, but saved!
 - `getLog()` - returns the entire log.
 - `tail(numLines)` - returns the last X lines of the log, where X is the number you pass. Defaults to 100.
 - `search(string)` - returns numbered lines where there were matches for your search. Pass a string.
-- `getSlice(start, numLines)` - get a 'slice' of the log. Pass the starting line and how many lines after it you want
-- `downloadLog()` - downloads a .txt file of the log. [See example below](#outputting).
+- `getSlice(start, end)` - get a 'slice' of the log. Pass the starting line index and optionally an ending line index.
+- `downloadLog()` - downloads a .txt file of the log.
 - `clear()` - clears the log.
 - `determineType()` - a more granular version of `typeof` for your convenience
 
-### Options <a name="options"></a>
+### Options
 
-In the debugout function definition, you can edit options:
+Pass any of the following options in the constructor in an object. You can also change them at runtime as properties of your debugout instance.
 
-```js
-// log in real time (forwards to console.log)
-self.realTimeLoggingOn = true; 
-// insert a timestamp in front of each log
-self.useTimestamps = false; 
-// store the output using window.localStorage() and continuously add to the same log each session
-self.useLocalStorage = false; 
-// set to false after you're done debugging to avoid the log eating up memory
-self.recordLogs = true; 
-// to avoid the log eating up potentially endless memory
-self.autoTrim = true; 
-// if autoTrim is true, this many most recent lines are saved
-self.maxLines = 2500; 
-// how many lines tail() will retrieve
-self.tailNumLines = 100; 
-// filename of log downloaded with downloadLog()
-self.logFilename = 'log.txt';
-// max recursion depth for logged objects
-self.maxDepth = 25;
-```
-
-### Outputting examples <a name="outputting"></a>
-
-Here are a couple examples of what you can do with the log. Each example assumes that you have established a `debugout` object and are logging with it:
-
-```js
-var bugout = new debugout();
-bugout.log('something');
-bugout.log(somethingElse);
-bugout.log('etc');
-```
-
-##### Example #1: Button that downloads the log as a .txt file
-
-Simply call debugout's `downloadLog()` method. You can change the filename by editing `self.logFilename`.
-
-```html
-<input type="button" value="Download log" onClick="bugout.downloadLog()">
-````
-
-##### Example #2: PhoneGap app that attaches the log to an email
-
-Example shown uses the [Email Composer plugin](https://github.com/inorganik/cordova-emailComposerWithAttachments) and also requires the File plugin: `cordova plugin add org.apache.cordova.file`.
-
-```js
-function sendLog() {
-	var logFile = bugout.getLog();
-
-	// save the file locally, so it can be retrieved from emailComposer
-	window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function(fileSystem) {
-		// create the file if it doesn't exist
-		fileSystem.root.getFile('log.txt', {create: true, exclusive: false}, function(file) {
-			// create writer
-			file.createWriter(function(writer) {
-		        // write
-	    		writer.write(logFile);
-	    		// when done writing, call up email composer
-				writer.onwriteend = function(evt) {
-		            // params: subject,body,toRecipients,ccRecipients,bccRecipients,bIsHTML,attachments,filename
-		            var subject = 'Log from myApp';
-		            var body = 'Attached is a log from my recent testing session.';
-					window.plugins.emailComposer.showEmailComposer(subject,body,[],[],[],false,['log.txt'], ['myApp log']);
-		        }
-			}, fileSystemError);
-		}, fileSystemError);
-	}, fileSystemError);
-}
-function fileSystemError(error) {
-    bugout.log('Error getting file system: '+error.code);
+```ts
+export interface DebugoutOptions {
+  realTimeLoggingOn?: boolean; // log in real time (forwards to console.log)
+  useTimestamps?: boolean; // insert a timestamp in front of each log
+  includeSessionMetadata?: boolean; // whether to include session start, end, duration, and when log is cleared
+  useLocalStorage?: boolean; // store the output using localStorage and continuously add to the same log each session
+  recordLogs?: boolean; // disable the core functionality of this lib 
+  autoTrim?: boolean; // to avoid the log eating up potentially endless memory
+  maxLines?: number; // if autoTrim is true, this many most recent lines are saved
+  tailNumLines?: number; // default number of lines tail gets
+  logFilename?: string; // filename of log downloaded with downloadLog()
+  maxDepth?: number; // max recursion depth for logged objects
+  localStorageKey?: string; // localStorage key
+  indent?: string; // string to use for indent (2 spaces)
+  quoteStrings?: boolean; // whether or not to put quotes around strings
 }
 ```
-### And more...
+Example using options:
 
-- Post the log to your server via an ajax request if an error or some other event occurs.
+```js
+const bugout = new Debugout({ realTimeLoggingOn: false });
+
+// instead of console.log
+bugout.log('log stuff'); // real time logging disabled (no console output)
+bugout.realTimeLoggingOn = true;
+bugout.log('more stuff'); // now, this will show up in your console.
+```
+
+### Usage ideas
+
+- Post the log to your server if an error or some other event occurs.
 - Allow the user to download a copy of a submitted form.
-- Generate a receipt for the user to download.
+- Generate output for the user to download.
 - Record survey answers and know how long each question took the user to answer.
 
+### Contributing
 
+1. Do your work in src/debugout.ts
+1. Test `npm t`
+1. Test demo: `npm start`
+
+### Don't log `window`
+
+Debugout will get stuck in an endless loop if you try to log the window object because it has a circular reference. It will work if you set `maxDepth` to 2, and you can see the root properties. The same thing happens if you do `JSON.stringify(window, null, '  ')`, but the error message provides some insight. 
+
+If you try to log Debugout, it just prints `... (Debugout)`. Otherwise, recursion would cause an endless loop.
 

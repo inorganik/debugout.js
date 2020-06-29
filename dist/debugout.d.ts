@@ -9,7 +9,7 @@ export interface DebugoutOptions {
     tailNumLines?: number;
     logFilename?: string;
     maxDepth?: number;
-    lsKey?: string;
+    localStorageKey?: string;
     indent?: string;
     quoteStrings?: boolean;
 }
@@ -28,7 +28,7 @@ export declare class Debugout {
     maxLines: number;
     logFilename: string;
     maxDepth: number;
-    lsKey: string;
+    localStorageKey: string;
     indent: string;
     quoteStrings: boolean;
     tailNumLines: number;
@@ -48,7 +48,7 @@ export declare class Debugout {
     warn(...args: unknown[]): void;
     error(...args: unknown[]): void;
     getLog(): string;
-    clear(clearStored?: boolean): void;
+    clear(): void;
     tail(numLines?: number): string;
     search(term: string): string;
     slice(...args: number[]): string;
