@@ -12,7 +12,6 @@
 
   <link rel="stylesheet" type="text/css" href="https://inorganik.github.io/assets/css/style.css?v=20191111">
 
-  <script src="dist/debugout.min.js" type="module"></script>
   <script>
 
     (function (i, s, o, g, r, a, m) {
@@ -56,15 +55,15 @@
     <section>
       <div class="col full marginTop">
         <div class="code-contain marginBottom indigo">
-          <code>const bugout = new Debugout();<br>
-            bugout.warn('a warning');<br>
-            bugout.error('an error');<br>
-            bugout.log('A date:', d);<br>
-            bugout.log('An array:', arr);<br>
-            bugout.log('A function:', testFunc);<br>
-            bugout.log('A regex', rgx);<br>
-            bugout.log('an object with nested objects and arrays...', obj);<br>
-            bugout.log('an array of objects...', arrayWithObjects);<br>
+          <code>const debugout = new Debugout();<br>
+            debugout.warn('a warning');<br>
+            debugout.error('an error');<br>
+            debugout.log('A date:', d);<br>
+            debugout.log('An array:', arr);<br>
+            debugout.log('A function:', testFunc);<br>
+            debugout.log('A regex', rgx);<br>
+            debugout.log('an object with nested objects and arrays...', obj);<br>
+            debugout.log('an array of objects...', arrayWithObjects);<br>
           </code>
         </div>
       </div>
@@ -108,7 +107,7 @@
           <input id="includeSessionMetadata" type="checkbox" checked> <label class="inlineLabel">includeSessionMetadata</label>
         </div>
         <div class="inlineLeft marginRight">
-          <input id="useLocalStorage" type="checkbox" checked> <label class="inlineLabel">useLocalStorage</label>
+          <input id="useLocalStorage" type="checkbox"> <label class="inlineLabel">useLocalStorage</label>
         </div>
         <div class="inlineLeft marginRight">
           <input id="recordLogs" type="checkbox" checked> <label class="inlineLabel">recordLogs</label>
@@ -124,11 +123,11 @@
           <label class="inlineLabel">logFilename</label>
         </div>
         <div class="inlineLeft marginRight">
-          <input type="text" value="2500" id="maxLines" style="width:50px; padding:0 5px;">
+          <input type="text" value="3000" id="maxLines" style="width:50px; padding:0 5px;">
           <label class="inlineLabel">maxLines</label>
         </div>
         <div class="inlineLeft marginRight">
-          <input type="text" value="25" id="maxDepth" style="width:40px; padding:0 5px;">
+          <input type="text" value="20" id="maxDepth" style="width:40px; padding:0 5px;">
           <label class="inlineLabel">maxDepth</label>
         </div>
         <div class="inlineLeft marginRight">
@@ -155,8 +154,6 @@
 <script type="module">
 
   import { Debugout } from './dist/debugout.js'
-
-  let bugout;
 
   const el = (id) => document.getElementById(id);
 
@@ -220,7 +217,7 @@
 
   function logStuff() {
     const options = establishOptionsFromInputs();
-    bugout = new Debugout(options);
+    window.bugout = new Debugout(options);
     bugout.warn('a warning');
     bugout.error('an error');
     bugout.log('A date:', d);

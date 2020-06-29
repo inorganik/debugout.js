@@ -6,6 +6,7 @@ export interface DebugoutOptions {
     recordLogs?: boolean;
     autoTrim?: boolean;
     maxLines?: number;
+    tailNumLines?: number;
     logFilename?: string;
     maxDepth?: number;
     lsKey?: string;
@@ -39,6 +40,7 @@ export declare class Debugout {
     time: () => void;
     timeEnd: () => void;
     constructor(options?: DebugoutOptions);
+    private startLog;
     private recordLog;
     private logMetadata;
     log(...args: unknown[]): void;
@@ -46,14 +48,13 @@ export declare class Debugout {
     warn(...args: unknown[]): void;
     error(...args: unknown[]): void;
     getLog(): string;
-    clear(): void;
+    clear(clearStored?: boolean): void;
     tail(numLines?: number): string;
     search(term: string): string;
     slice(...args: number[]): string;
     downloadLog(): void;
-    private libNotice;
     private save;
-    load(): DebugoutStorage;
+    private load;
     determineType(object: any): string;
     stringifyObject(obj: any, startingDepth?: number): string;
     stringifyArray(arr: Array<any>, startingDepth?: number): string;

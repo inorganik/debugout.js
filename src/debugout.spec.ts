@@ -130,6 +130,9 @@ describe('Debugout', () => {
       const expected = `[\n  ${nested}\n]`;
       expect(debugout.stringify(subj)).toEqual(expected);
     });
+    it('should detect itself', () => {
+      expect(debugout.stringify(debugout)).toEqual('... (Debugout)');
+    });
 
   });
 

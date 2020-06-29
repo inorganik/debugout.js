@@ -6,11 +6,12 @@ export interface DebugoutOptions {
   recordLogs?: boolean; // set to false after you're done debugging to avoid the log eating up memory
   autoTrim?: boolean; // to avoid the log eating up potentially endless memory
   maxLines?: number; // if autoTrim is true, this many most recent lines are saved
+  tailNumLines?: number; // default number of lines tail gets
   logFilename?: string; // filename of log downloaded with downloadLog()
   maxDepth?: number; // max recursion depth for logged objects
   lsKey?: string; // localStorage key
   indent?: string; // string to use for indent (2 spaces)
-  quoteStrings?: boolean;
+  quoteStrings?: boolean; // whether or not to put quotes around strings
 }
 
 const debugoutDefaults: DebugoutOptions = {
@@ -20,9 +21,10 @@ const debugoutDefaults: DebugoutOptions = {
   useLocalStorage: false,
   recordLogs: true,
   autoTrim: true,
-  maxLines: 2500,
+  maxLines: 3000,
+  tailNumLines: 25,
+  maxDepth: 20,
   logFilename: 'debugout.txt',
-  maxDepth: 25,
   lsKey: 'debugout.js',
   indent: '  ',
   quoteStrings: true
@@ -56,7 +58,7 @@ export class Debugout {
   startTime: Date;
   output = ''; // holds all logs
 
-  version = () => '0.9.0';
+  version = () => '1.0.0';
   indentsForDepth = (depth: number) => this.indent.repeat(Math.max(depth, 0));
 
   // forwarded console methods not used by debugout
@@ -85,21 +87,28 @@ export class Debugout {
         this.output = stored.log;
         this.startTime = new Date(stored.startTime);
         const end = new Date(stored.lastLog);
-        this.logMetadata(`Session end: ${stored.lastLog}`);
-        this.logMetadata(this.formatSessionDuration(this.startTime, end));
+        this.logMetadata(`Last session end: ${stored.lastLog}`);
+        this.logMetadata(`Last ${this.formatSessionDuration(this.startTime, end)}`);
+        this.startLog();
+      } else {
+        this.startLog();
       }
     } else {
-      this.startTime = new Date();
       this.useLocalStorage = false;
-      this.logMetadata(`Session started: ${this.formatDate(this.startTime)}`);
+      this.startLog();
     }
+  }
+
+  private startLog(): void {
+    this.startTime = new Date();
+    this.logMetadata(`Session started: ${this.formatDate(this.startTime)}`);
   }
 
   // records a log
   private recordLog(...args: unknown[]): void {
     // record log
     if (this.useTimestamps) {
-      this.output += this.formatDate();
+      this.output += this.formatDate() + ' ';
     }
     this.output += args.map(obj => this.stringify(obj)).join(' ');
     this.output += '\n';
@@ -127,22 +136,31 @@ export class Debugout {
   info(...args: unknown[]): void {
     // tslint:disable-next-line:no-console
     if (this.realTimeLoggingOn) console.info(...args);
-    if (this.recordLogs) this.recordLog('[INFO]', ...args);
+    if (this.recordLogs) {
+      this.output += '[INFO] ';
+      this.recordLog(...args);
+    }
   }
   warn(...args: unknown[]): void {
     if (this.realTimeLoggingOn) console.warn(...args);
-    if (this.recordLogs) this.recordLog('[WARN]', ...args);
+    if (this.recordLogs) {
+      this.output += '[WARN] ';
+      this.recordLog(...args);
+    }
   }
   error(...args: unknown[]): void {
     if (this.realTimeLoggingOn) console.error(...args);
-    if (this.recordLogs) this.recordLog('[ERROR]', ...args);
+    if (this.recordLogs) {
+      this.output += '[ERROR ';
+      this.recordLog(...args);
+    }
   }
 
   getLog(): string {
     let retrievalTime = new Date();
     // if recording is off, so dev knows why they don't have any logs
     if (!this.recordLogs) {
-      this.libNotice('log recording is off.');
+      this.info('Log recording is off');
     }
     // if using local storage, get values
     if (this.useLocalStorage && window && window.localStorage) {
@@ -159,11 +177,11 @@ export class Debugout {
     return this.output;
   }
 
-  // clears the log
-  clear(): void {
+  // clears the log. if true is passed, 
+  clear(clearStored = false): void {
     this.output = '';
     if (this.includeSessionMetadata) {
-      this.logMetadata('Log cleared: ' + this.formatDate().trim());
+      this.logMetadata('Log cleared ' + this.formatDate());
     }
     if (this.useLocalStorage) this.save();
   }
@@ -210,10 +228,6 @@ export class Debugout {
 
   // METHODS FOR CONSTRUCTING THE LOG
 
-  private libNotice(msg: string): void {
-    this.log(`[debugout.js] ${msg}`);
-  }
-
   private save(): void {
     const saveObject = {
       startTime: this.startTime,
@@ -223,7 +237,7 @@ export class Debugout {
     window.localStorage.setItem(this.lsKey, JSON.stringify(saveObject));
   }
 
-  load(): DebugoutStorage {
+  private load(): DebugoutStorage {
     const saved = window.localStorage.getItem(this.lsKey);
     if (saved) {
       return JSON.parse(saved) as DebugoutStorage;
@@ -239,18 +253,21 @@ export class Debugout {
     } else {
       let type = typeof object as string;
       if (type === 'object') {
-        if (object.length === undefined) {
-          if (typeof object.getTime === 'function') {
+        if (Array.isArray(object)) {
+          type = 'Array';
+        } else {
+          if (object instanceof Date) {
             type = 'Date';
           }
-          else if (typeof object.test === 'function') {
+          else if (object instanceof RegExp) {
             type = 'RegExp';
+          }
+          else if (object instanceof Debugout) {
+            type = 'Debugout';
           }
           else {
             type = 'Object';
           }
-        } else {
-          type = 'Array';
         }
       }
       return type;
@@ -343,8 +360,10 @@ export class Debugout {
       case 'null':
       case 'undefined':
         return type;
+      case 'Debugout':
+        return '... (Debugout)'; // prevent endless loop
       default:
-        return '';
+        return '?';
     }
   }
 
@@ -374,12 +393,7 @@ export class Debugout {
 
   // timestamp, formatted for brevity
   formatDate(ts = new Date()): string {
-    const month = ('0' + (ts.getMonth() + 1)).slice(-2);
-    const hrs = Number(ts.getHours());
-    const mins = ('0' + ts.getMinutes()).slice(-2);
-    const secs = ('0' + ts.getSeconds()).slice(-2);
-    const msecs = ('0' + ts.getMilliseconds()).slice(-2);
-    return `[${ts.getFullYear()}-${month}-${ts.getDate()} ${hrs}:${mins}:${secs}:${msecs}] `;
+    return `[${ts.toISOString()}]`;
   }
 
   objectSize(obj: any): number {

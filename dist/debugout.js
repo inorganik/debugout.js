@@ -9,13 +9,6 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
-var __spreadArrays = (this && this.__spreadArrays) || function () {
-    for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
-    for (var r = Array(s), k = 0, i = 0; i < il; i++)
-        for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
-            r[k] = a[j];
-    return r;
-};
 var debugoutDefaults = {
     realTimeLoggingOn: true,
     useTimestamps: false,
@@ -23,9 +16,10 @@ var debugoutDefaults = {
     useLocalStorage: false,
     recordLogs: true,
     autoTrim: true,
-    maxLines: 2500,
-    logFilename: 'debugout.txt',
+    maxLines: 5000,
+    tailNumLines: 25,
     maxDepth: 25,
+    logFilename: 'debugout.txt',
     lsKey: 'debugout.js',
     indent: '  ',
     quoteStrings: true
@@ -37,7 +31,7 @@ var Debugout = /** @class */ (function () {
         this.indent = '  ';
         this.tailNumLines = 25;
         this.output = ''; // holds all logs
-        this.version = function () { return '0.9.0'; };
+        this.version = function () { return '1.0.0'; };
         this.indentsForDepth = function (depth) { return _this.indent.repeat(Math.max(depth, 0)); };
         // forwarded console methods not used by debugout
         /* tslint:disable:no-console */
@@ -58,16 +52,23 @@ var Debugout = /** @class */ (function () {
                 this.output = stored.log;
                 this.startTime = new Date(stored.startTime);
                 var end = new Date(stored.lastLog);
-                this.logMetadata("Session end: " + stored.lastLog);
-                this.logMetadata(this.formatSessionDuration(this.startTime, end));
+                this.logMetadata("Last session end: " + stored.lastLog);
+                this.logMetadata("Last " + this.formatSessionDuration(this.startTime, end));
+                this.startLog();
+            }
+            else {
+                this.startLog();
             }
         }
         else {
-            this.startTime = new Date();
             this.useLocalStorage = false;
-            this.logMetadata("Session started: " + this.formatDate(this.startTime));
+            this.startLog();
         }
     }
+    Debugout.prototype.startLog = function () {
+        this.startTime = new Date();
+        this.logMetadata("Session started: " + this.formatDate(this.startTime));
+    };
     // records a log
     Debugout.prototype.recordLog = function () {
         var _this = this;
@@ -77,7 +78,7 @@ var Debugout = /** @class */ (function () {
         }
         // record log
         if (this.useTimestamps) {
-            this.output += this.formatDate();
+            this.output += this.formatDate() + ' ';
         }
         this.output += args.map(function (obj) { return _this.stringify(obj); }).join(' ');
         this.output += '\n';
@@ -115,8 +116,10 @@ var Debugout = /** @class */ (function () {
         // tslint:disable-next-line:no-console
         if (this.realTimeLoggingOn)
             console.info.apply(console, args);
-        if (this.recordLogs)
-            this.recordLog.apply(this, __spreadArrays(['[INFO]'], args));
+        if (this.recordLogs) {
+            this.output += '[INFO] ';
+            this.recordLog.apply(this, args);
+        }
     };
     Debugout.prototype.warn = function () {
         var args = [];
@@ -125,8 +128,10 @@ var Debugout = /** @class */ (function () {
         }
         if (this.realTimeLoggingOn)
             console.warn.apply(console, args);
-        if (this.recordLogs)
-            this.recordLog.apply(this, __spreadArrays(['[WARN]'], args));
+        if (this.recordLogs) {
+            this.output += '[WARN] ';
+            this.recordLog.apply(this, args);
+        }
     };
     Debugout.prototype.error = function () {
         var args = [];
@@ -135,14 +140,16 @@ var Debugout = /** @class */ (function () {
         }
         if (this.realTimeLoggingOn)
             console.error.apply(console, args);
-        if (this.recordLogs)
-            this.recordLog.apply(this, __spreadArrays(['[ERROR]'], args));
+        if (this.recordLogs) {
+            this.output += '[ERROR ';
+            this.recordLog.apply(this, args);
+        }
     };
     Debugout.prototype.getLog = function () {
         var retrievalTime = new Date();
         // if recording is off, so dev knows why they don't have any logs
         if (!this.recordLogs) {
-            this.libNotice('log recording is off.');
+            this.info('Log recording is off');
         }
         // if using local storage, get values
         if (this.useLocalStorage && window && window.localStorage) {
@@ -158,11 +165,12 @@ var Debugout = /** @class */ (function () {
         }
         return this.output;
     };
-    // clears the log
-    Debugout.prototype.clear = function () {
+    // clears the log. if true is passed, 
+    Debugout.prototype.clear = function (clearStored) {
+        if (clearStored === void 0) { clearStored = false; }
         this.output = '';
         if (this.includeSessionMetadata) {
-            this.logMetadata('Log cleared: ' + this.formatDate().trim());
+            this.logMetadata('Log cleared ' + this.formatDate());
         }
         if (this.useLocalStorage)
             this.save();
@@ -210,9 +218,6 @@ var Debugout = /** @class */ (function () {
         window.URL.revokeObjectURL(a.href);
     };
     // METHODS FOR CONSTRUCTING THE LOG
-    Debugout.prototype.libNotice = function (msg) {
-        this.log("[debugout.js] " + msg);
-    };
     Debugout.prototype.save = function () {
         var saveObject = {
             startTime: this.startTime,
@@ -238,19 +243,22 @@ var Debugout = /** @class */ (function () {
         else {
             var type = typeof object;
             if (type === 'object') {
-                if (object.length === undefined) {
-                    if (typeof object.getTime === 'function') {
+                if (Array.isArray(object)) {
+                    type = 'Array';
+                }
+                else {
+                    if (object instanceof Date) {
                         type = 'Date';
                     }
-                    else if (typeof object.test === 'function') {
+                    else if (object instanceof RegExp) {
                         type = 'RegExp';
+                    }
+                    else if (object instanceof Debugout) {
+                        type = 'Debugout';
                     }
                     else {
                         type = 'Object';
                     }
-                }
-                else {
-                    type = 'Array';
                 }
             }
             return type;
@@ -352,8 +360,10 @@ var Debugout = /** @class */ (function () {
             case 'null':
             case 'undefined':
                 return type;
+            case 'Debugout':
+                return 'this'; // prevent endless loop
             default:
-                return '';
+                return '?';
         }
     };
     Debugout.prototype.trimLog = function (maxLines) {
@@ -381,12 +391,7 @@ var Debugout = /** @class */ (function () {
     // timestamp, formatted for brevity
     Debugout.prototype.formatDate = function (ts) {
         if (ts === void 0) { ts = new Date(); }
-        var month = ('0' + (ts.getMonth() + 1)).slice(-2);
-        var hrs = Number(ts.getHours());
-        var mins = ('0' + ts.getMinutes()).slice(-2);
-        var secs = ('0' + ts.getSeconds()).slice(-2);
-        var msecs = ('0' + ts.getMilliseconds()).slice(-2);
-        return "[" + ts.getFullYear() + "-" + month + "-" + ts.getDate() + " " + hrs + ":" + mins + ":" + secs + ":" + msecs + "] ";
+        return "[" + ts.toISOString() + "]";
     };
     Debugout.prototype.objectSize = function (obj) {
         var size = 0;
