@@ -16,7 +16,7 @@ Some highlights of debugout:
 - optionally store the output in `window.localStorage` and continuously add to the same log each session
 - optionally cap the log to X most recent lines to limit memory consumption
 
-** New in 1.0 **
+**New in 1.0**
 
 - Improved logging (multiple args, better formatting)
 - Modularized
@@ -27,7 +27,7 @@ Some highlights of debugout:
 
 ### Installation
 
-npm: `npm i debugout.js`
+On npm: `debugout.js`
 
 ### Usage
 
@@ -59,7 +59,7 @@ Whatever you log is saved and added to the log file.
 Pass any of the following options in the constructor in an object. You can also change them at runtime as properties of your debugout instance.
 
 ```ts
-export interface DebugoutOptions {
+interface DebugoutOptions {
   realTimeLoggingOn?: boolean; // log in real time (forwards to console.log)
   useTimestamps?: boolean; // insert a timestamp in front of each log
   includeSessionMetadata?: boolean; // whether to include session start, end, duration, and when log is cleared
@@ -71,7 +71,7 @@ export interface DebugoutOptions {
   logFilename?: string; // filename of log downloaded with downloadLog()
   maxDepth?: number; // max recursion depth for logged objects
   localStorageKey?: string; // localStorage key
-  indent?: string; // string to use for indent (2 spaces)
+  indent?: string; // string to use for indent
   quoteStrings?: boolean; // whether or not to put quotes around strings
 }
 ```
@@ -96,6 +96,7 @@ bugout.log('more stuff'); // now, this will show up in your console.
 ### Contributing
 
 1. Do your work in src/debugout.ts
+1. Lint `npm run lint`
 1. Test `npm t`
 1. Test demo: `npm start`
 
