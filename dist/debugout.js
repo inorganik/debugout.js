@@ -31,7 +31,7 @@ var Debugout = /** @class */ (function () {
         this.indent = '  ';
         this.tailNumLines = 25;
         this.output = ''; // holds all logs
-        this.version = function () { return '1.0.0'; };
+        this.version = function () { return '1.1.0'; };
         this.indentsForDepth = function (depth) { return _this.indent.repeat(Math.max(depth, 0)); };
         // forwarded console methods not used by debugout
         /* tslint:disable:no-console */
@@ -142,6 +142,18 @@ var Debugout = /** @class */ (function () {
             console.error.apply(console, args);
         if (this.recordLogs) {
             this.output += '[ERROR] ';
+            this.recordLog.apply(this, args);
+        }
+    };
+    Debugout.prototype.debug = function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
+        if (this.realTimeLoggingOn)
+            console.debug.apply(console, args);
+        if (this.recordLogs) {
+            this.output += '[DEBUG] ';
             this.recordLog.apply(this, args);
         }
     };

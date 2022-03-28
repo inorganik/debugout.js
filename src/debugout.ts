@@ -58,7 +58,7 @@ export class Debugout {
   startTime: Date;
   output = ''; // holds all logs
 
-  version = () => '1.0.0';
+  version = () => '1.1.0';
   indentsForDepth = (depth: number) => this.indent.repeat(Math.max(depth, 0));
 
   // forwarded console methods not used by debugout

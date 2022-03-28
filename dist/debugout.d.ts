@@ -47,6 +47,7 @@ export declare class Debugout {
     info(...args: unknown[]): void;
     warn(...args: unknown[]): void;
     error(...args: unknown[]): void;
+    debug(...args: unknown[]): void;
     getLog(): string;
     clear(): void;
     tail(numLines?: number): string;

@@ -1,6 +1,6 @@
 {
   "name": "debugout.js",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Generates a text file from your logs.",
   "main": "dist/debugout.min.js",
   "scripts": {
