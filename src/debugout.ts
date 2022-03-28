@@ -3,7 +3,7 @@ export interface DebugoutOptions {
   useTimestamps?: boolean; // insert a timestamp in front of each log
   includeSessionMetadata?: boolean; // whether to include session start, end, duration, and when log is cleared
   useLocalStorage?: boolean; // store the output using localStorage and continuously add to the same log each session
-  recordLogs?: boolean; // disable the core functionality of this lib 
+  recordLogs?: boolean; // disable the core functionality of this lib
   autoTrim?: boolean; // to avoid the log eating up potentially endless memory
   maxLines?: number; // if autoTrim is true, this many most recent lines are saved
   tailNumLines?: number; // default number of lines tail gets
@@ -152,6 +152,13 @@ export class Debugout {
     if (this.realTimeLoggingOn) console.error(...args);
     if (this.recordLogs) {
       this.output += '[ERROR] ';
+      this.recordLog(...args);
+    }
+  }
+  debug(...args: unknown[]): void {
+    if (this.realTimeLoggingOn) console.debug(...args);
+    if (this.recordLogs) {
+      this.output += '[DEBUG] ';
       this.recordLog(...args);
     }
   }
